@@ -5,4 +5,4 @@
 - [x] Criar evento e checkout simulado
 - [x] Criar área do aluno e ingressos
 - [x] Criar painel administrativo
-- [ ] Validar navegação e responsividade
+- [x] Validar navegação e responsividade
