@@ -1,8 +1,8 @@
 # Roadmap
 
-- [ ] Criar identidade visual e navegação compartilhada
-- [ ] Criar Home e catálogo de produtos
-- [ ] Criar evento e checkout simulado
-- [ ] Criar área do aluno e ingressos
-- [ ] Criar painel administrativo
+- [x] Criar identidade visual e navegação compartilhada
+- [x] Criar Home e catálogo de produtos
+- [x] Criar evento e checkout simulado
+- [x] Criar área do aluno e ingressos
+- [x] Criar painel administrativo
 - [ ] Validar navegação e responsividade
