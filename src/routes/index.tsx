@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   return <>
     <section className="relative min-h-[500px] overflow-hidden bg-primary text-primary-foreground md:min-h-[560px]">
-      <img src={hero} alt="Estudantes chegando à Semana Jurídica" width={1600} height={912} className="absolute inset-0 h-full w-full object-cover object-[62%_center] opacity-70" />
+      <img src={hero} alt="Estudantes chegando à Semana Jurídica" width={1600} height={912} className="absolute inset-0 h-full w-full object-cover object-[62%_center] opacity-70 grayscale" />
       <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-primary/10" />
       <div className="app-container relative flex min-h-[500px] items-end pb-10 pt-24 md:min-h-[560px] md:items-center md:py-20">
         <div className="max-w-xl"><span className="inline-flex rounded-full bg-gold px-3 py-1 text-xs font-extrabold uppercase text-gold-foreground">Inscrições abertas</span>
