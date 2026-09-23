@@ -4,11 +4,9 @@ import { ArrowRight, Bell, CalendarDays, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { products } from "@/lib/catalog";
+import { board } from "@/lib/board";
 import hero from "@/assets/semana-juridica.jpg";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
     { title: "Sistema Themis — Portal do Direito" },
@@ -20,7 +18,6 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
   return <>
     <section className="relative min-h-[500px] overflow-hidden bg-primary text-primary-foreground md:min-h-[560px]">
@@ -38,6 +35,17 @@ function Index() {
     <section className="app-container py-9"><div className="flex items-end justify-between"><div><p className="text-sm font-bold uppercase text-gold">Loja do DA</p><h2 className="mt-1 text-2xl font-bold">Destaques institucionais</h2></div><Link to="/produtos" className="text-sm font-bold text-primary">Ver todos</Link></div>
       <div className="-mx-4 mt-5 flex snap-x gap-4 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0">{products.map((product) => <div key={product.id} className="w-[78vw] max-w-[290px] shrink-0 snap-start sm:w-auto sm:max-w-none"><ProductCard product={product} /></div>)}</div>
     </section>
-    <section className="border-y border-border bg-card"><div className="app-container py-9"><div className="mx-auto max-w-2xl text-center"><span className="mx-auto grid size-11 place-items-center rounded-full bg-navy-soft text-primary"><Bell size={21} /></span><p className="mt-3 text-sm font-bold uppercase text-gold">Aviso importante</p><h2 className="mt-1 text-xl font-bold">Retirada de carteirinhas estudantis</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">Disponível na sala do DA, de segunda a sexta, das 18h às 20h30.</p></div></div></section>
+    <section className="border-y border-border bg-card">
+      <div className="app-container py-9">
+        <div className="text-center"><p className="text-sm font-bold uppercase text-gold">Gestão 2026</p><h2 className="mt-1 text-2xl font-bold">Quem faz o DA acontecer</h2><p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">Conheça a chapa diretora responsável pelos produtos, eventos e pela representação dos estudantes.</p></div>
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-6">
+          {board.map((member) => <article key={member.name} className="overflow-hidden rounded-xl border border-border bg-background">
+            <img src={member.photo} alt={`Foto de ${member.name}`} loading="lazy" width={768} height={768} className="aspect-square w-full object-cover grayscale" />
+            <div className="p-3 text-center"><h3 className="truncate text-sm font-bold">{member.name}</h3><p className="mt-0.5 text-[11px] font-bold uppercase tracking-wide text-gold">{member.role}</p></div>
+          </article>)}
+        </div>
+      </div>
+    </section>
+    <section className="app-container py-9"><div className="mx-auto max-w-2xl text-center"><span className="mx-auto grid size-11 place-items-center rounded-full bg-navy-soft text-primary"><Bell size={21} /></span><p className="mt-3 text-sm font-bold uppercase text-gold">Aviso importante</p><h2 className="mt-1 text-xl font-bold">Retirada de carteirinhas estudantis</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">Disponível na sala do DA, de segunda a sexta, das 18h às 20h30.</p></div></section>
   </>;
 }
