@@ -49,7 +49,7 @@ function AdminPage() {
 }
 
 function Login({ onLogin }: { onLogin: (email: string) => void }) {
-  const [email, setEmail] = useState(board[0].email);
+  const [email, setEmail] = useState(board[0]?.email ?? "");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   return <div className="app-container grid min-h-[70vh] place-items-center py-10">
