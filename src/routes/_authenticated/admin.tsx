@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { board } from "@/lib/board";
 import { money, products as catalog } from "@/lib/catalog";
 
-export const Route = createFileRoute("/admin")({ head: () => ({ meta: [
+export const Route = createFileRoute("/_authenticated/admin")({ head: () => ({ meta: [
   { title: "Painel da Diretoria — Sistema Themis" }, { name: "description", content: "Visão gerencial do Diretório Acadêmico." }, { property: "og:title", content: "Painel da Diretoria — Sistema Themis" }, { property: "og:description", content: "Pagamentos, inscrições e produção." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" },
 ] }), component: AdminPage });
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FakeQrCode } from "@/components/qr-code";
 
-export const Route = createFileRoute("/perfil")({ head: () => ({ meta: [
+export const Route = createFileRoute("/_authenticated/perfil")({ head: () => ({ meta: [
   { title: "Área do Aluno — Sistema Themis" }, { name: "description", content: "Acompanhe pedidos e ingressos." }, { property: "og:title", content: "Área do Aluno — Sistema Themis" }, { property: "og:description", content: "Pedidos, produção e ingressos em um só lugar." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: ProfilePage });
 
