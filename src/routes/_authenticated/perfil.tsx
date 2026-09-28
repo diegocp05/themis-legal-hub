@@ -3,6 +3,7 @@ import { Check, ChevronRight, LogOut, MapPin, PackageCheck, Settings, UserRound 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FakeQrCode } from "@/components/qr-code";
+import { useCurrentUser, useSignOut } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/perfil")({ head: () => ({ meta: [
   { title: "Área do Aluno — Sistema Themis" }, { name: "description", content: "Acompanhe pedidos e ingressos." }, { property: "og:title", content: "Área do Aluno — Sistema Themis" }, { property: "og:description", content: "Pedidos, produção e ingressos em um só lugar." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
@@ -17,6 +18,8 @@ const steps = [
 
 function ProfilePage() {
   const [tab, setTab] = useState<"orders" | "tickets">("orders");
+  const { data: me } = useCurrentUser();
+  const signOut = useSignOut();
   return <div className="app-container py-7 sm:py-11">
     <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
       <div className="flex min-w-0 items-center gap-3"><span className="grid size-12 shrink-0 place-items-center rounded-full bg-navy-soft text-primary"><UserRound /></span><div className="min-w-0"><p className="truncate text-sm text-muted-foreground">Olá, {me?.isAdmin ? "diretoria" : "estudante"}</p><h1 className="truncate text-2xl font-bold">{me?.user.email}</h1></div></div>
