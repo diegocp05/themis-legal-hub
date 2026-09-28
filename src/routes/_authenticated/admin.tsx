@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { CircleDollarSign, Lock, LogOut, Package, PackageCheck, Pencil, Plus, ShoppingBag, Trash2, TrendingUp, UsersRound } from "lucide-react";
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { Button } from "@/components/ui/button";
-import { board } from "@/lib/board";
+import { supabase } from "@/integrations/supabase/client";
+import { useCurrentUser, useSignOut } from "@/lib/auth";
 import { money, products as catalog } from "@/lib/catalog";
 
 export const Route = createFileRoute("/_authenticated/admin")({ head: () => ({ meta: [
@@ -40,54 +42,72 @@ const payments = [
 ];
 
 function AdminPage() {
-  const [email, setEmail] = useState<string | null | undefined>(undefined);
-  useEffect(() => { setEmail(sessionStorage.getItem("themis-admin")); }, []);
-  if (email === undefined) return null;
-  const member = board.find((m) => m.email === email);
-  if (!member) return <Login onLogin={(value) => { sessionStorage.setItem("themis-admin", value); setEmail(value); }} />;
-  return <Dashboard member={member} onLogout={() => { sessionStorage.removeItem("themis-admin"); setEmail(null); }} />;
+  const { data, isLoading, refetch } = useCurrentUser();
+  const signOut = useSignOut();
+  if (isLoading || !data) return null;
+  if (!data.isAdmin) return <NoAccess email={data.user.email ?? ""} onClaimed={() => refetch()} onLogout={signOut} />;
+  return <Dashboard name={data.user.email ?? "diretoria"} onLogout={signOut} />;
 }
 
-function Login({ onLogin }: { onLogin: (email: string) => void }) {
-  const [email, setEmail] = useState(board[0]?.email ?? "");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+function NoAccess({ email, onClaimed, onLogout }: { email: string; onClaimed: () => void; onLogout: () => void }) {
+  const { data: noAdmin } = useQuery({ queryKey: ["admin-exists"], queryFn: async () => { const { data } = await supabase.rpc("admin_exists"); return data === false; } });
   return <div className="app-container grid min-h-[70vh] place-items-center py-10">
-    <form className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-sm" onSubmit={(e) => { e.preventDefault(); if (password === "themis2026") { onLogin(email); } else { setError("Senha incorreta. Verifique suas credenciais de membro da diretoria."); } }}>
+    <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 text-center shadow-sm">
       <span className="mx-auto grid size-12 place-items-center rounded-lg bg-primary text-gold"><Lock size={22} /></span>
-      <h1 className="mt-4 text-center text-2xl font-bold">Acesso da Diretoria</h1>
-      <p className="mt-2 text-center text-sm text-muted-foreground">Área restrita aos 6 membros da chapa diretora.</p>
-      <label className="mt-6 grid gap-1.5 text-sm font-bold">Membro
-        <select value={email} onChange={(e) => setEmail(e.target.value)} className="h-12 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring">
-          {board.map((m) => <option key={m.email} value={m.email}>{m.name} — {m.role}</option>)}
-        </select>
-      </label>
-      <label className="mt-4 grid gap-1.5 text-sm font-bold">Senha
-        <input required type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(""); }} placeholder="••••••••" className="h-12 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring" />
-      </label>
-      {error && <p className="mt-3 rounded-lg bg-destructive/10 p-3 text-xs font-bold text-destructive">{error}</p>}
-      <Button size="lg" className="mt-5 w-full" type="submit">Entrar no painel</Button>
-      <p className="mt-3 rounded-lg bg-muted p-3 text-center text-xs text-muted-foreground">Protótipo — senha de demonstração: <strong className="text-foreground">themis2026</strong></p>
-    </form>
+      <h1 className="mt-4 text-2xl font-bold">Acesso restrito à diretoria</h1>
+      <p className="mt-2 text-sm text-muted-foreground">Você entrou como <strong className="text-foreground">{email}</strong>, com perfil de aluno. Peça a um membro da diretoria para liberar seu acesso.</p>
+      {noAdmin && <Button size="lg" className="mt-5 w-full" onClick={async () => { await supabase.rpc("claim_first_admin"); onClaimed(); }}>Configurar como primeiro membro da diretoria</Button>}
+      <Button variant="outline" className="mt-3 w-full" onClick={onLogout}><LogOut /> Sair</Button>
+    </div>
   </div>;
 }
 
-function Dashboard({ member, onLogout }: { member: (typeof board)[number]; onLogout: () => void }) {
-  const [tab, setTab] = useState<"overview" | "orders" | "products">("overview");
+function BoardAdmin() {
+  const { data: members = [], refetch } = useQuery({ queryKey: ["board"], queryFn: async () => { const { data, error } = await supabase.rpc("list_board"); if (error) throw error; return data; } });
+  const [email, setEmail] = useState("");
+  const [msg, setMsg] = useState("");
+  const act = async (target: string, grant: boolean) => {
+    const { data, error } = await supabase.rpc("set_board_member", { _email: target, _grant: grant });
+    setMsg(error ? "Não foi possível atualizar." : data === "not_found" ? "Nenhuma conta com esse e-mail. A pessoa precisa se cadastrar antes." : data === "self" ? "Você não pode remover o próprio acesso." : grant ? "Acesso concedido." : "Acesso removido.");
+    if (data === "ok") { setEmail(""); refetch(); }
+  };
+  return <section className="mt-6 rounded-xl border border-border bg-card">
+    <div className="border-b border-border p-5">
+      <h2 className="text-lg font-bold">Membros da diretoria</h2>
+      <p className="text-xs text-muted-foreground">Promova contas já cadastradas pelo e-mail.</p>
+      <form className="mt-4 flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); act(email, true); }}>
+        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemplo.com" className="h-11 min-w-0 flex-1 rounded-lg border border-input bg-background px-3 outline-none focus:ring-2 focus:ring-ring" />
+        <Button type="submit"><Plus /> Promover</Button>
+      </form>
+      {msg && <p className="mt-3 text-xs font-bold text-muted-foreground">{msg}</p>}
+    </div>
+    <ul className="divide-y divide-border">
+      {members.map((m) => <li key={m.user_id} className="flex items-center gap-3 p-4 sm:px-5">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-navy-soft text-primary"><UsersRound size={18} /></span>
+        <p className="min-w-0 flex-1 truncate font-bold">{m.email}</p>
+        <Button variant="ghost" size="sm" className="text-destructive" onClick={() => act(m.email, false)}>Remover</Button>
+      </li>)}
+    </ul>
+  </section>;
+}
+
+function Dashboard({ name, onLogout }: { name: string; onLogout: () => void }) {
+  const [tab, setTab] = useState<"overview" | "orders" | "products" | "board">("overview");
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [items, setItems] = useState<Item[]>(() => catalog.map((p) => ({ id: p.id, name: p.name, price: p.price, sizes: p.sizes, image: p.image })));
-  const tabs = [{ id: "overview", label: "Visão geral" }, { id: "orders", label: "Pedidos" }, { id: "products", label: "Produtos" }] as const;
+  const tabs = [{ id: "overview", label: "Visão geral" }, { id: "orders", label: "Pedidos" }, { id: "products", label: "Produtos" }, { id: "board", label: "Diretoria" }] as const;
   return <div className="app-container py-8 sm:py-12">
     <header className="flex flex-wrap items-start justify-between gap-4">
-      <div><p className="text-sm font-bold uppercase text-gold">Acesso da diretoria</p><h1 className="mt-1 text-3xl font-bold">Olá, {member.name.split(" ")[0]}</h1><p className="mt-2 text-muted-foreground">{member.role} · Lote de setembro · atualização em tempo real simulada</p></div>
+      <div className="min-w-0"><p className="text-sm font-bold uppercase text-gold">Acesso da diretoria</p><h1 className="mt-1 truncate text-3xl font-bold">Painel da Diretoria</h1><p className="mt-2 truncate text-muted-foreground">{name} · Lote de setembro</p></div>
       <Button variant="outline" onClick={onLogout}><LogOut /> Sair</Button>
     </header>
-    <div className="mt-7 grid grid-cols-3 rounded-lg bg-muted p-1">
-      {tabs.map((t) => <button key={t.id} onClick={() => setTab(t.id)} className={`h-11 rounded-md text-sm font-bold ${tab === t.id ? "bg-card text-primary shadow-sm" : "text-muted-foreground"}`}>{t.label}</button>)}
+    <div className="mt-7 grid grid-cols-4 rounded-lg bg-muted p-1">
+      {tabs.map((t) => <button key={t.id} onClick={() => setTab(t.id)} className={`h-11 rounded-md text-xs font-bold sm:text-sm ${tab === t.id ? "bg-card text-primary shadow-sm" : "text-muted-foreground"}`}>{t.label}</button>)}
     </div>
     {tab === "overview" && <Overview />}
     {tab === "orders" && <OrdersAdmin orders={orders} setOrders={setOrders} />}
     {tab === "products" && <ProductsAdmin items={items} setItems={setItems} />}
+    {tab === "board" && <BoardAdmin />}
   </div>;
 }
 
