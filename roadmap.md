@@ -16,3 +16,11 @@
   - [x] RF08: CRUD de produtos no painel
   - [x] RF09/RF10: listagem de pedidos com filtro por status e baixa "Entregue"
   - [x] Horário do evento ajustado para 18h–22h; grade PP–GG na camiseta
+- [x] Back-end no Supabase próprio (projeto qmjpkketagcczxshrmpk)
+  - [x] Eventos com lista, página por evento e programação
+  - [x] Inscrição gratuita sem conta (nome, e-mail, CPF, celular, RA, LGPD) com código de ingresso
+  - [x] "Meus ingressos" ligado às inscrições feitas com o e-mail da conta
+  - [x] Painel: CRUD de eventos, inscritos por evento (busca, presença, exportar CSV)
+  - [x] Painel: CRUD de produtos com upload de imagem e CRUD de avisos da Home
+  - [x] Visão geral do painel com números reais
+- [ ] Vendas online (tabelas `orders` e `order_items` prontas; falta gravar o pedido no checkout e integrar o pagamento)

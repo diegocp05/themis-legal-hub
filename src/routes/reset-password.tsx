@@ -20,10 +20,10 @@ function ResetPage() {
     <form className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-sm" onSubmit={async (e) => {
       e.preventDefault();
       const { error } = await supabase.auth.updateUser({ password });
-      if (error) setError("Link inválido ou expirado. Solicite outro."); else navigate({ to: "/perfil" });
+      if (error) setError("Não foi possível salvar. Se veio por e-mail, o link pode ter expirado: solicite outro."); else navigate({ to: "/admin" });
     }}>
       <h1 className="text-2xl font-bold">Definir nova senha</h1>
-      <label className="mt-6 grid gap-1.5 text-sm font-bold">Nova senha<input required minLength={6} type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring" /></label>
+      <label className="mt-6 grid gap-1.5 text-sm font-bold">Nova senha<input required minLength={8} type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} className="h-12 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring" /></label>
       {error && <p className="mt-3 rounded-lg bg-destructive/10 p-3 text-xs font-bold text-destructive">{error}</p>}
       <Button size="lg" className="mt-5 w-full" type="submit">Salvar senha</Button>
     </form>

@@ -12,12 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CertificadosRouteImport } from './routes/certificados'
 import { Route as CheckoutRouteImport } from './routes/checkout'
-import { Route as EventosRouteImport } from './routes/eventos'
 import { Route as ProdutosRouteImport } from './routes/produtos'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
-import { Route as AuthenticatedPerfilRouteImport } from './routes/_authenticated/perfil'
+import { Route as EventosIndexRouteImport } from './routes/eventos.index'
+import { Route as EventosSlugRouteImport } from './routes/eventos.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -33,14 +34,14 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CertificadosRoute = CertificadosRouteImport.update({
+  id: '/certificados',
+  path: '/certificados',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CheckoutRoute = CheckoutRouteImport.update({
   id: '/checkout',
   path: '/checkout',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventosRoute = EventosRouteImport.update({
-  id: '/eventos',
-  path: '/eventos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProdutosRoute = ProdutosRouteImport.update({
@@ -58,86 +59,99 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedPerfilRoute = AuthenticatedPerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => AuthenticatedRouteRoute,
+const EventosIndexRoute = EventosIndexRouteImport.update({
+  id: '/eventos/',
+  path: '/eventos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventosSlugRoute = EventosSlugRouteImport.update({
+  id: '/eventos/$slug',
+  path: '/eventos/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/certificados': typeof CertificadosRoute
   '/checkout': typeof CheckoutRoute
-  '/eventos': typeof EventosRoute
   '/produtos': typeof ProdutosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/perfil': typeof AuthenticatedPerfilRoute
+  '/eventos/$slug': typeof EventosSlugRoute
+  '/eventos/': typeof EventosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/certificados': typeof CertificadosRoute
   '/checkout': typeof CheckoutRoute
-  '/eventos': typeof EventosRoute
   '/produtos': typeof ProdutosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/perfil': typeof AuthenticatedPerfilRoute
+  '/eventos/$slug': typeof EventosSlugRoute
+  '/eventos': typeof EventosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/certificados': typeof CertificadosRoute
   '/checkout': typeof CheckoutRoute
-  '/eventos': typeof EventosRoute
   '/produtos': typeof ProdutosRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
-  '/_authenticated/perfil': typeof AuthenticatedPerfilRoute
+  '/eventos/$slug': typeof EventosSlugRoute
+  '/eventos/': typeof EventosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/auth'
+    | '/certificados'
     | '/checkout'
-    | '/eventos'
     | '/produtos'
     | '/reset-password'
     | '/admin'
-    | '/perfil'
+    | '/eventos/$slug'
+    | '/eventos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/certificados'
     | '/checkout'
-    | '/eventos'
     | '/produtos'
     | '/reset-password'
     | '/admin'
-    | '/perfil'
+    | '/eventos/$slug'
+    | '/eventos'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/certificados'
     | '/checkout'
-    | '/eventos'
     | '/produtos'
     | '/reset-password'
     | '/_authenticated/admin'
-    | '/_authenticated/perfil'
+    | '/eventos/$slug'
+    | '/eventos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  CertificadosRoute: typeof CertificadosRoute
   CheckoutRoute: typeof CheckoutRoute
-  EventosRoute: typeof EventosRoute
   ProdutosRoute: typeof ProdutosRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  EventosSlugRoute: typeof EventosSlugRoute
+  EventosIndexRoute: typeof EventosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -163,18 +177,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/certificados': {
+      id: '/certificados'
+      path: '/certificados'
+      fullPath: '/certificados'
+      preLoaderRoute: typeof CertificadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/checkout': {
       id: '/checkout'
       path: '/checkout'
       fullPath: '/checkout'
       preLoaderRoute: typeof CheckoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/eventos': {
-      id: '/eventos'
-      path: '/eventos'
-      fullPath: '/eventos'
-      preLoaderRoute: typeof EventosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/produtos': {
@@ -198,24 +212,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/perfil': {
-      id: '/_authenticated/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof AuthenticatedPerfilRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+    '/eventos/': {
+      id: '/eventos/'
+      path: '/eventos'
+      fullPath: '/eventos/'
+      preLoaderRoute: typeof EventosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/eventos/$slug': {
+      id: '/eventos/$slug'
+      path: '/eventos/$slug'
+      fullPath: '/eventos/$slug'
+      preLoaderRoute: typeof EventosSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
-  AuthenticatedPerfilRoute: typeof AuthenticatedPerfilRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
-  AuthenticatedPerfilRoute: AuthenticatedPerfilRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -225,10 +244,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  CertificadosRoute: CertificadosRoute,
   CheckoutRoute: CheckoutRoute,
-  EventosRoute: EventosRoute,
   ProdutosRoute: ProdutosRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  EventosSlugRoute: EventosSlugRoute,
+  EventosIndexRoute: EventosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

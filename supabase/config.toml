@@ -1,1 +1,7 @@
-project_id = "gfurrtltnoxoqmpfdubw"
+project_id = "qmjpkketagcczxshrmpk"
+
+[functions.admin-users]
+verify_jwt = false
+
+[functions.event-emails]
+verify_jwt = false

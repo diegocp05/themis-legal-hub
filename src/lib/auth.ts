@@ -3,7 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 
 export function safeRedirect(value: unknown): string {
-  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : "/perfil";
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : "/admin";
 }
 
 /** Current user + roles, re-validated with the auth server. */
@@ -16,7 +16,7 @@ export function useCurrentUser() {
       if (!user) return null;
       const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
       const list = (roles ?? []).map((r) => r.role);
-      return { user, isAdmin: list.includes("admin") };
+      return { user, isAdmin: list.includes("admin"), isOwner: list.includes("owner") };
     },
     staleTime: 30_000,
   });

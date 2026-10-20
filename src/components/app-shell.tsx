@@ -1,12 +1,12 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarDays, Home, Package, Scale, UserRound } from "lucide-react";
+import { CalendarDays, Home, Package, Scale, ShieldCheck } from "lucide-react";
 import type { ReactNode } from "react";
 
 const nav = [
   { to: "/", label: "Início", icon: Home },
   { to: "/produtos", label: "Produtos", icon: Package },
   { to: "/eventos", label: "Eventos", icon: CalendarDays },
-  { to: "/perfil", label: "Perfil", icon: UserRound },
+  { to: "/admin", label: "Diretoria", icon: ShieldCheck },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -19,8 +19,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           <span className="min-w-0"><strong className="block truncate font-display text-base">Sistema Themis</strong><small className="block truncate text-[10px] font-bold uppercase text-muted-foreground">Diretório Acadêmico de Direito</small></span>
         </Link>
         <nav className="hidden items-center gap-1 md:flex" aria-label="Navegação principal">
-          {nav.map(({ to, label }) => <Link key={to} to={to} className="rounded-md px-4 py-2 text-sm font-bold text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-navy-soft text-primary" }}>{label}</Link>)}
-          <Link to="/admin" className="ml-2 rounded-md border border-border px-4 py-2 text-sm font-bold">Diretoria</Link>
+          {nav.slice(0, -1).map(({ to, label }) => <Link key={to} to={to} className="rounded-md px-4 py-2 text-sm font-bold text-muted-foreground hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-navy-soft text-primary" }}>{label}</Link>)}
+          <Link to="/admin" className="ml-2 rounded-md border border-border px-4 py-2 text-sm font-bold" activeProps={{ className: "border-primary bg-navy-soft text-primary" }}>Diretoria</Link>
         </nav>
       </div>
     </header>
