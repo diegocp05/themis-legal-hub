@@ -19,9 +19,8 @@ dist-ssr
 # Supabase CLI
 supabase/.temp/
 
-# Wrangler / Cloudflare
-.wrangler/
-.dev.vars
+# Vercel
+.vercel
 
 # Editor directories and files
 .vscode/*
