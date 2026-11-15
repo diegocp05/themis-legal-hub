@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, CircleDollarSign, KeyRound, Lock, LogOut, Package, PackageCheck, ShoppingBag, UsersRound } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ActivityAdmin } from "@/components/admin/activity-admin";
+import { PagesAdmin } from "@/components/admin/pages-admin";
 import { AnnouncementsAdmin } from "@/components/admin/announcements-admin";
 import { BoardAdmin } from "@/components/admin/board-admin";
 import { EventsAdmin } from "@/components/admin/events-admin";
@@ -39,13 +41,15 @@ function NoAccess({ email, onLogout }: { email: string; onLogout: () => void }) 
 }
 
 const tabs = [
-  { id: "overview", label: "Visão geral" },
-  { id: "events", label: "Eventos" },
-  { id: "products", label: "Produtos" },
-  { id: "announcements", label: "Avisos" },
-  { id: "orders", label: "Pedidos" },
-  { id: "members", label: "Membros do DA" },
-  { id: "board", label: "Acessos" },
+  { id: "overview", label: "Visão geral", gold: true },
+  { id: "events", label: "Eventos", gold: true },
+  { id: "products", label: "Produtos", gold: true },
+  { id: "announcements", label: "Avisos", gold: true },
+  { id: "orders", label: "Pedidos", gold: true },
+  { id: "members", label: "Membros do DA", gold: true },
+  { id: "board", label: "Acessos", gold: true },
+  { id: "activity", label: "Histórico", gold: false },
+  { id: "pages", label: "Páginas", gold: false },
 ] as const;
 
 function Dashboard({ name, isOwner, onLogout }: { name: string; isOwner: boolean; onLogout: () => void }) {
@@ -56,8 +60,8 @@ function Dashboard({ name, isOwner, onLogout }: { name: string; isOwner: boolean
       <div className="flex gap-2"><Button asChild variant="outline"><Link to="/reset-password"><KeyRound /> Alterar senha</Link></Button><Button variant="outline" onClick={onLogout}><LogOut /> Sair</Button></div>
     </header>
     <div className="-mx-4 mt-7 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-      <div className="flex min-w-max gap-1 rounded-lg bg-muted p-1 sm:grid sm:min-w-0 sm:grid-cols-7">
-        {tabs.map((t) => <button key={t.id} onClick={() => setTab(t.id)} className={`h-11 shrink-0 rounded-md px-4 text-xs font-bold sm:px-0 sm:text-sm ${tab === t.id ? "bg-card text-primary shadow-sm" : "text-muted-foreground"}`}>{t.label}</button>)}
+      <div className="flex min-w-max gap-1 rounded-lg bg-muted p-1 sm:grid sm:min-w-0 sm:grid-cols-9">
+        {tabs.map((t) => <button key={t.id} onClick={() => setTab(t.id)} className={`h-11 shrink-0 rounded-md px-4 text-xs font-bold sm:px-0 sm:text-sm ${tab === t.id ? "bg-card shadow-sm" : ""} ${t.gold ? "text-gold" : tab === t.id ? "text-primary" : "text-muted-foreground"}`}>{t.label}</button>)}
       </div>
     </div>
     {tab === "overview" && <Overview />}
@@ -65,8 +69,10 @@ function Dashboard({ name, isOwner, onLogout }: { name: string; isOwner: boolean
     {tab === "products" && <ProductsAdmin />}
     {tab === "announcements" && <AnnouncementsAdmin />}
     {tab === "orders" && <OrdersAdmin />}
-    {tab === "members" && <MembersAdmin />}
+    {tab === "members" && <MembersAdmin isOwner={isOwner} />}
     {tab === "board" && <BoardAdmin isOwner={isOwner} />}
+    {tab === "activity" && <ActivityAdmin />}
+    {tab === "pages" && <PagesAdmin />}
   </div>;
 }
 

@@ -4,29 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDateTime } from "@/lib/data";
+import { callAdminUsers, generatePassword } from "./admin-users";
 import { ErrorNote, Field, Panel, inputClass } from "./form";
-
-const errorText: Record<string, string> = {
-  invalid_email: "Informe um e-mail válido.",
-  weak_password: "A senha precisa ter pelo menos 8 caracteres.",
-  email_exists: "Já existe uma conta com esse e-mail.",
-  protected_user: "Esta conta não pode ser alterada por aqui.",
-  forbidden: "Somente o responsável pela plataforma pode gerenciar contas.",
-};
-
-async function callAdminUsers(body: Record<string, string>) {
-  const { error } = await supabase.functions.invoke("admin-users", { body });
-  if (!error) return null;
-  const context = (error as { context?: Response }).context;
-  const payload = context ? await context.json().catch(() => null) : null;
-  return errorText[payload?.error] ?? "Não foi possível concluir. Tente novamente.";
-}
-
-function generatePassword() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
-  const bytes = crypto.getRandomValues(new Uint32Array(12));
-  return Array.from(bytes, (n) => alphabet[n % alphabet.length]).join("");
-}
 
 export function BoardAdmin({ isOwner }: { isOwner: boolean }) {
   const { data: members = [], refetch, isLoading } = useQuery({ queryKey: ["board"], queryFn: async () => { const { data, error } = await supabase.rpc("list_board"); if (error) throw error; return data; } });
@@ -41,7 +20,7 @@ export function BoardAdmin({ isOwner }: { isOwner: boolean }) {
     e.preventDefault(); setBusy(true); setError(""); setCreated(null);
     const failure = await callAdminUsers({ action: "create", email: email.trim(), password });
     setBusy(false);
-    if (failure) return setError(failure);
+    if (failure.error) return setError(failure.error);
     setCreated({ email: email.trim().toLowerCase(), password });
     setEmail(""); setPassword("");
     refetch();
@@ -49,11 +28,11 @@ export function BoardAdmin({ isOwner }: { isOwner: boolean }) {
   const remove = async (userId: string, memberEmail: string) => {
     if (!window.confirm(`Remover o acesso de ${memberEmail}? A conta será apagada.`)) return;
     const failure = await callAdminUsers({ action: "delete", user_id: userId });
-    if (failure) return window.alert(failure);
+    if (failure.error) return window.alert(failure.error);
     refetch();
   };
 
-  return <Panel title="Acessos ao painel" subtitle={isOwner ? "Somente você, como responsável, cadastra e remove contas do painel." : "Contas com acesso ao painel. Novos acessos são criados pelo responsável pela plataforma."}>
+  return <Panel title="Acessos ao painel" subtitle={isOwner ? "O acesso de cada membro é criado na ficha, em Membros do DA. Aqui ficam todas as contas do painel." : "Contas com acesso ao painel. Novos acessos são criados pelo responsável pela plataforma."}>
     {isOwner && <form onSubmit={create} className="grid gap-4 border-b border-border bg-muted/50 p-5 sm:grid-cols-[1fr_1fr_auto]">
       <Field label="E-mail do novo membro"><input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@exemplo.com" className={inputClass} /></Field>
       <Field label="Senha inicial" hint="mínimo de 8 caracteres">
@@ -88,7 +67,7 @@ function ResetPassword({ userId, email, onDone }: { userId: string; email: strin
     e.preventDefault(); setBusy(true); setMsg(null);
     const failure = await callAdminUsers({ action: "set_password", user_id: userId, password });
     setBusy(false);
-    setMsg(failure ? { ok: false, text: failure } : { ok: true, text: `Senha de ${email} alterada para ${password}.` });
+    setMsg(failure.error ? { ok: false, text: failure.error } : { ok: true, text: `Senha de ${email} alterada para ${password}.` });
   };
   return <form onSubmit={save} className="mt-3 grid gap-2 rounded-lg border border-border bg-muted/50 p-3 sm:grid-cols-[1fr_auto_auto]">
     <input required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} className={`${inputClass} font-mono`} aria-label="Nova senha" />

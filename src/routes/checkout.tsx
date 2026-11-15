@@ -89,7 +89,7 @@ function CheckoutPage() {
         </section>
         <section className="space-y-3">
           <Notice icon={RefreshCcw} title="Sem trocas ou devoluções" text="Produtos confeccionados sob encomenda. Confira a grade antes de finalizar: não há devolução por erro na escolha do tamanho." />
-          <Notice icon={MapPin} title="Entrega presencial" text="A retirada acontece exclusivamente na sede do DA, mediante apresentação do status do pedido e de um documento com foto." />
+          <Notice icon={MapPin} title="Entrega presencial" text="A retirada acontece exclusivamente na sede do DA, mediante apresentação do código do pedido como comprovante." />
         </section>
       </div>
       <aside className="h-fit rounded-xl border border-border bg-card p-5 shadow-sm lg:sticky lg:top-24">

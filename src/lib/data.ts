@@ -36,6 +36,18 @@ export function useEvent(slug: string) {
   });
 }
 
+export function useEventPhotos(eventId: string | undefined) {
+  return useQuery({
+    queryKey: ["events", "photos", eventId],
+    enabled: !!eventId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("event_photos").select("id, event_id, image_url, created_at").eq("event_id", eventId!).order("created_at");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function useSpotsTaken(eventId: string | undefined) {
   return useQuery({
     queryKey: ["events", "spots", eventId],
@@ -74,7 +86,7 @@ export function useBoardMembers() {
   return useQuery({
     queryKey: ["board-members", "active"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("board_members").select("*").eq("active", true).order("sort_order").order("created_at");
+      const { data, error } = await supabase.from("board_members").select("id, name, role, photo_url, sector, instagram, sort_order, active, in_chapa").eq("active", true).order("sort_order").order("created_at");
       if (error) throw error;
       return data;
     },
@@ -112,7 +124,7 @@ export function useCertificateEvents() {
   return useQuery({
     queryKey: ["events", "certificates"],
     queryFn: async () => {
-      const { data, error } = await supabase.from("events").select("id, slug, title, starts_at, ends_at, certificate_hours")
+      const { data, error } = await supabase.from("events").select("id, slug, title, starts_at, ends_at, certificate_complementary_hours, certificate_mandatory_hours")
         .eq("published", true).eq("certificate_enabled", true).lte("starts_at", new Date().toISOString()).order("starts_at", { ascending: false });
       if (error) throw error;
       return data.filter(hasEnded);
@@ -146,7 +158,7 @@ export const formatDateTime = (value: string) => format(new Date(value), "dd/MM/
 export const slugify = (value: string) =>
   value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
-export type MediaFolder = "events" | "products" | "board";
+export type MediaFolder = "events" | "products" | "board" | "pages" | "gallery" | "signatures";
 
 export async function uploadMedia(file: File, folder: MediaFolder) {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";

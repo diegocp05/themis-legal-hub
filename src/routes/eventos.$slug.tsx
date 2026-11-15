@@ -1,40 +1,53 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Award, CalendarDays, CheckCircle2, Clock3, MapPin, ShieldCheck, UsersRound } from "lucide-react";
+import { Award, CalendarDays, CheckCircle2, Clock3, Images, MapPin, ShieldCheck, UsersRound } from "lucide-react";
 import { useState } from "react";
+import { z } from "zod";
+import { EventGallery } from "@/components/event-gallery";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { type EventRow, categoryLabel, formatDateTime, formatEventDays, formatEventHours, hasEnded, isRegistrationOpen, useEvent, useSpotsTaken } from "@/lib/data";
+import { pageText, usePageContent } from "@/lib/pages";
 import hero from "@/assets/semana-juridica.jpg";
 
-export const Route = createFileRoute("/eventos/$slug")({ head: () => ({ meta: [
+const searchSchema = z.object({ aba: z.enum(["fotos"]).optional().catch(undefined) });
+
+export const Route = createFileRoute("/eventos/$slug")({ validateSearch: searchSchema, head: () => ({ meta: [
   { title: "Evento — Sistema Themis" }, { name: "description", content: "Inscrição gratuita em evento do DA de Direito." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: EventPage });
 
 function EventPage() {
   const { slug } = Route.useParams();
+  const { aba } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const { data, isLoading } = useEvent(slug);
   const { data: taken } = useSpotsTaken(data?.event.id);
+  const { data: pages } = usePageContent();
 
   if (isLoading) return <div className="app-container py-10"><div className="aspect-[16/9] w-full animate-pulse rounded-xl bg-muted" /></div>;
   if (!data) return <div className="app-container grid min-h-[60vh] place-items-center py-10 text-center"><div><h1 className="text-2xl font-bold">Evento não encontrado</h1><p className="mt-2 text-muted-foreground">Ele pode ter sido removido ou ainda não foi publicado.</p><Button asChild className="mt-6"><Link to="/eventos">Ver todos os eventos</Link></Button></div></div>;
 
   const { event, schedule } = data;
   const remaining = event.capacity != null && taken != null ? Math.max(event.capacity - taken, 0) : null;
+  const tab = aba === "fotos" ? "fotos" : "sobre";
+  const choose = (next: "sobre" | "fotos") => navigate({ search: next === "fotos" ? { aba: "fotos" } : {}, replace: true });
   return <div className="app-container py-5 sm:py-10">
-    <img src={event.image_url ?? hero} alt={event.title} width={1600} height={912} className="aspect-[16/9] w-full rounded-xl object-cover grayscale" />
-    <div className="mt-7 grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
+    <img src={event.image_url || pageText(pages, "fallback_image") || hero} alt={event.title} width={1600} height={912} className="aspect-[16/9] w-full rounded-xl object-cover grayscale" />
+    <span className="mt-6 block text-sm font-bold uppercase text-gold">{categoryLabel(event.category)} · Gratuito</span>
+    <h1 className="mt-2 text-3xl font-bold sm:text-4xl">{event.title}</h1>
+    <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3"><Info icon={CalendarDays} text={formatEventDays(event)} /><Info icon={Clock3} text={formatEventHours(event)} />{event.location && <Info icon={MapPin} text={event.location} />}</div>
+    <div className="mt-6 flex gap-2" role="tablist" aria-label="Conteúdo do evento">
+      {(["sobre", "fotos"] as const).map((id) => <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => choose(id)} className={`inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-bold ${tab === id ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground"}`}>{id === "fotos" && <Images size={16} />}{id === "sobre" ? "Sobre" : "Fotos"}</button>)}
+    </div>
+    {tab === "fotos" ? <EventGallery eventId={event.id} title={event.title} /> : <div className="mt-7 grid gap-8 lg:grid-cols-[minmax(0,1fr)_400px]">
       <div>
-        <span className="text-sm font-bold uppercase text-gold">{categoryLabel(event.category)} · Gratuito</span>
-        <h1 className="mt-2 text-3xl font-bold sm:text-4xl">{event.title}</h1>
-        <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3"><Info icon={CalendarDays} text={formatEventDays(event)} /><Info icon={Clock3} text={formatEventHours(event)} />{event.location && <Info icon={MapPin} text={event.location} />}</div>
-        {(event.description || event.summary) && <><hr className="my-7 border-border" /><h2 className="text-xl font-bold">Sobre o evento</h2><p className="mt-3 whitespace-pre-line leading-7 text-muted-foreground">{event.description || event.summary}</p></>}
+        {(event.description || event.summary) && <><h2 className="text-xl font-bold">Sobre o evento</h2><p className="mt-3 whitespace-pre-line leading-7 text-muted-foreground">{event.description || event.summary}</p></>}
         {schedule.length > 0 && <><h2 className="mt-7 text-xl font-bold">Programação</h2><div className="mt-3 space-y-3">{schedule.map((s) => <div key={s.id} className="rounded-lg border border-border bg-card p-4 font-semibold">{s.label}</div>)}</div></>}
       </div>
       <aside className="h-fit rounded-xl border border-border bg-card p-5 shadow-sm lg:sticky lg:top-24">
         <RegistrationPanel event={event} remaining={remaining} />
       </aside>
-    </div>
+    </div>}
   </div>;
 }
 

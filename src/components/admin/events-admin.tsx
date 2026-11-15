@@ -1,10 +1,13 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ArrowLeft, CalendarDays, Download, Eye, EyeOff, Pencil, Plus, Search, Star, Trash2, UsersRound } from "lucide-react";
+import { ArrowLeft, Award, CalendarDays, Download, Eye, EyeOff, Images, Pencil, Plus, Search, Star, Trash2, UsersRound } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { templateReady } from "@/lib/certificate";
 import { type EventCategory, type EventRow, eventCategories, formatDateTime, formatEventDays, slugify } from "@/lib/data";
+import { CertificateModel, useCertificateTemplate } from "./certificate-model";
+import { EventPhotos } from "./event-photos";
 import { ErrorNote, Field, ImageInput, Panel, Toggle, inputClass } from "./form";
 
 type AdminEvent = EventRow & { registrations: { count: number }[] };
@@ -24,23 +27,36 @@ export function EventsAdmin() {
   const { data: events = [], isLoading } = useAdminEvents();
   const [form, setForm] = useState<{ mode: "new" } | { mode: "edit"; event: EventRow } | null>(null);
   const [attendees, setAttendees] = useState<EventRow | null>(null);
+  const [gallery, setGallery] = useState<EventRow | null>(null);
+  const [model, setModel] = useState(false);
+  const { data: photoRows = [] } = useQuery({
+    queryKey: ["admin", "event-photos"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("event_photos").select("event_id");
+      if (error) throw error;
+      return data;
+    },
+  });
   const queryClient = useQueryClient();
 
   if (attendees) return <Attendees event={attendees} onBack={() => setAttendees(null)} />;
+  if (gallery) return <EventPhotos event={gallery} onBack={() => setGallery(null)} />;
+  if (model) return <CertificateModel onBack={() => setModel(false)} />;
 
   const remove = async (e: EventRow) => {
-    if (!window.confirm(`Excluir "${e.title}"? As inscrições deste evento também serão apagadas.`)) return;
+    if (!window.confirm(`Excluir "${e.title}"? As inscrições e as fotos deste evento também serão apagadas.`)) return;
     await supabase.from("events").delete().eq("id", e.id);
     queryClient.invalidateQueries({ queryKey: ["admin"] });
     queryClient.invalidateQueries({ queryKey: ["events"] });
   };
 
-  return <Panel title="Eventos" subtitle="Divulgue eventos e acompanhe os inscritos." action={<Button onClick={() => setForm({ mode: "new" })}><Plus /> Novo evento</Button>}>
+  return <Panel title="Eventos" subtitle="Divulgue eventos e acompanhe os inscritos." action={<div className="flex flex-wrap gap-2">{!form && <Button variant="outline" onClick={() => setModel(true)}><Award /> Modelo do certificado</Button>}<Button onClick={() => setForm({ mode: "new" })}><Plus /> Novo evento</Button></div>}>
     {form && <EventForm key={form.mode === "edit" ? form.event.id : "new"} initial={form.mode === "edit" ? form.event : null} onDone={() => setForm(null)} />}
     <ul className="divide-y divide-border">
       {isLoading && <li className="p-6"><div className="h-12 animate-pulse rounded-lg bg-muted" /></li>}
       {events.map((e) => {
         const count = e.registrations[0]?.count ?? 0;
+        const photoCount = photoRows.filter((photo) => photo.event_id === e.id).length;
         return <li key={e.id} className="flex flex-wrap items-center gap-3 p-4 sm:flex-nowrap sm:gap-4 sm:px-5">
           {e.image_url ? <img src={e.image_url} alt="" className="size-12 shrink-0 rounded-lg object-cover grayscale" /> : <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><CalendarDays size={20} /></span>}
           <div className="min-w-0 flex-1">
@@ -49,10 +65,11 @@ export function EventsAdmin() {
             <div className="mt-1 flex gap-1.5">
               <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${e.published ? "bg-success-soft text-success" : "bg-muted text-muted-foreground"}`}>{e.published ? <Eye size={11} /> : <EyeOff size={11} />}{e.published ? "Publicado" : "Rascunho"}</span>
               {!e.registration_open && <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase text-muted-foreground">Inscrições fechadas</span>}
-              {e.certificate_enabled && <span className="rounded-full bg-navy-soft px-2 py-0.5 text-[10px] font-bold uppercase text-primary">Certificado · {String(e.certificate_hours ?? "").replace(".", ",")}h</span>}
+              {e.certificate_enabled && <span className="rounded-full bg-navy-soft px-2 py-0.5 text-[10px] font-bold uppercase text-primary">Certificado · {formatHours(e.certificate_complementary_hours ?? e.certificate_hours)}h compl.{e.certificate_mandatory_hours != null ? ` · ${formatHours(e.certificate_mandatory_hours)}h obrig.` : ""}</span>}
             </div>
           </div>
           <div className="flex w-full gap-2 sm:w-auto">
+            <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => setGallery(e)}><Images size={16} /> Fotos{photoCount ? ` · ${photoCount}` : ""}</Button>
             <Button variant="outline" size="sm" className="flex-1 sm:flex-none" onClick={() => setAttendees(e)}><UsersRound size={16} /> Inscritos</Button>
             <Button variant="outline" size="icon" onClick={() => setForm({ mode: "edit", event: e })} aria-label={`Editar ${e.title}`}><Pencil size={16} /></Button>
             <Button variant="ghost" size="icon" className="text-destructive" onClick={() => remove(e)} aria-label={`Excluir ${e.title}`}><Trash2 size={16} /></Button>
@@ -64,6 +81,12 @@ export function EventsAdmin() {
   </Panel>;
 }
 
+const formatHours = (value: number | null) => (value == null ? "" : String(value).replace(".", ","));
+const parseHours = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return Number.parseFloat(trimmed.replace(",", "."));
+};
 const toLocalInput = (iso: string | null) => (iso ? format(new Date(iso), "yyyy-MM-dd'T'HH:mm") : "");
 const fromLocalInput = (value: string) => (value ? new Date(value).toISOString() : null);
 
@@ -90,25 +113,34 @@ function EventForm({ initial, onDone }: { initial: EventRow | null; onDone: () =
     category: initial?.category ?? ("faculdade" as EventCategory),
     registration_closes_at: toLocalInput(initial?.registration_closes_at ?? null),
     certificate_enabled: initial?.certificate_enabled ?? false,
-    certificate_hours: initial?.certificate_hours?.toString().replace(".", ",") ?? "",
+    certificate_complementary_hours: formatHours(initial?.certificate_complementary_hours ?? initial?.certificate_hours ?? null),
+    certificate_mandatory_hours: formatHours(initial?.certificate_mandatory_hours ?? null),
   });
   const [scheduleText, setScheduleText] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const templateQuery = useCertificateTemplate();
   const scheduleValue = scheduleText ?? (schedule ?? []).map((s) => s.label).join("\n");
   const set = <K extends keyof typeof v>(key: K, value: (typeof v)[K]) => setV((cur) => ({ ...cur, [key]: value }));
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    const hours = v.certificate_hours ? Number.parseFloat(v.certificate_hours.replace(",", ".")) : null;
-    if (hours != null && (!Number.isFinite(hours) || hours <= 0)) return setError("Informe a carga horária em horas, ex.: 3 ou 1,5.");
-    if (v.certificate_enabled && hours == null) return setError("Informe a carga horária para liberar o certificado.");
+    const complementary = parseHours(v.certificate_complementary_hours);
+    const mandatory = parseHours(v.certificate_mandatory_hours);
+    if ((complementary != null && (!Number.isFinite(complementary) || complementary <= 0)) || (mandatory != null && (!Number.isFinite(mandatory) || mandatory <= 0))) return setError("Informe as horas com um número maior que zero, ex.: 3 ou 1,5.");
+    if (v.certificate_enabled && (complementary == null || mandatory == null)) return setError("Informe as horas complementares e as obrigatórias. Os dois valores podem ser diferentes.");
+    if (v.certificate_enabled && !initial?.certificate_enabled) {
+      if (templateQuery.isLoading) return setError("Aguarde o modelo do certificado carregar.");
+      if (!templateReady(templateQuery.data)) return setError("Salve o modelo do certificado com o nome e a assinatura do presidente do DA, do coordenador e do presidente da Atlética.");
+    }
     setBusy(true); setError("");
     const payload = {
       category: v.category,
       registration_closes_at: fromLocalInput(v.registration_closes_at),
       certificate_enabled: v.certificate_enabled,
-      certificate_hours: hours,
+      certificate_complementary_hours: complementary,
+      certificate_mandatory_hours: mandatory,
+      certificate_hours: complementary,
       title: v.title.trim(),
       slug: slugify(v.slug || v.title),
       summary: v.summary.trim() || null,
@@ -127,7 +159,12 @@ function EventForm({ initial, onDone }: { initial: EventRow | null; onDone: () =
       : await supabase.from("events").insert(payload).select("id").single();
     if (res.error) {
       setBusy(false);
-      return setError(res.error.code === "23505" ? "Já existe um evento com esse endereço (slug)." : res.error.code === "23514" ? "Confira as datas: o término deve ser depois do início." : "Não foi possível salvar o evento.");
+      const constraint = res.error.code === "23514" ? res.error.message : "";
+      return setError(constraint.includes("certificate_signers_missing")
+        ? "Salve o modelo do certificado com as três assinaturas antes de liberar."
+        : constraint.includes("certificate_not_ready")
+        ? "Informe as horas e conclua as assinaturas antes de liberar o certificado."
+        : res.error.code === "23505" ? "Já existe um evento com esse endereço (slug)." : res.error.code === "23514" ? "Confira as datas: o término deve ser depois do início." : "Não foi possível salvar o evento.");
     }
     if (scheduleText !== null) {
       const eventId = res.data.id;
@@ -158,9 +195,11 @@ function EventForm({ initial, onDone }: { initial: EventRow | null; onDone: () =
       <Toggle label="Publicado no site" checked={v.published} onChange={(x) => set("published", x)} />
       <Toggle label="Inscrições abertas" checked={v.registration_open} onChange={(x) => set("registration_open", x)} />
       <Toggle label="Destaque na Home" checked={v.featured} onChange={(x) => set("featured", x)} />
-      <Toggle label="Emitir certificado para presentes" checked={v.certificate_enabled} onChange={(x) => set("certificate_enabled", x)} />
-      {v.certificate_enabled && <Field label="Carga horária (horas)" hint="aparece no certificado; liberado após o término do evento"><input inputMode="decimal" value={v.certificate_hours} onChange={(e) => set("certificate_hours", e.target.value)} placeholder="3" className={inputClass} /></Field>}
+      <Toggle label="Emitir certificado para presentes" checked={v.certificate_enabled} onChange={(x) => { if (x && !templateReady(templateQuery.data)) { setError("Salve o modelo do certificado com as três assinaturas antes de liberar."); return; } setError(""); set("certificate_enabled", x); }} />
+      <p className="text-xs font-normal text-muted-foreground">A liberação copia o modelo assinado pelo presidente do DA, pelo coordenador e pelo presidente da Atlética. Sem essas assinaturas o certificado não vale.</p>
     </div>
+    <Field label="Horas complementares" hint="Do 1º ao 3º ano o certificado usa só este valor. A liberação vale depois do término do evento."><input inputMode="decimal" value={v.certificate_complementary_hours} onChange={(e) => set("certificate_complementary_hours", e.target.value)} placeholder="10" className={inputClass} /></Field>
+    <Field label="Horas obrigatórias" hint="Opção do 4º e do 5º ano. Pode ser diferente das complementares."><input inputMode="decimal" value={v.certificate_mandatory_hours} onChange={(e) => set("certificate_mandatory_hours", e.target.value)} placeholder="8" className={inputClass} /></Field>
     <ErrorNote text={error} />
     <div className="flex gap-2 sm:col-span-2"><Button type="submit" disabled={busy}>{busy ? "Salvando..." : "Salvar evento"}</Button><Button type="button" variant="ghost" onClick={onDone}>Cancelar</Button></div>
   </form>;

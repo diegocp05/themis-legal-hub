@@ -12,7 +12,7 @@ export function Toggle({ label, checked, onChange }: { label: string; checked: b
   return <label className="flex items-center gap-2.5 text-sm font-bold"><input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="size-4 accent-gold" />{label}</label>;
 }
 
-export function ImageInput({ value, onChange, folder, label = "Imagem" }: { value: string | null; onChange: (url: string | null) => void; folder: MediaFolder; label?: string }) {
+export function ImageInput({ value, onChange, folder, label = "Imagem", fit = "cover" }: { value: string | null; onChange: (url: string | null) => void; folder: MediaFolder; label?: string; fit?: "cover" | "contain" }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const pick = async (file: File | undefined) => {
@@ -23,7 +23,7 @@ export function ImageInput({ value, onChange, folder, label = "Imagem" }: { valu
   };
   return <div className="grid gap-1.5 text-sm font-bold">{label}
     <div className="flex items-center gap-3">
-      {value ? <img src={value} alt="" className="size-16 shrink-0 rounded-lg object-cover" /> : <span className="grid size-16 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><ImagePlus size={20} /></span>}
+      {value ? <img src={value} alt="" className={fit === "contain" ? "h-16 w-28 shrink-0 rounded-lg border border-border bg-white object-contain" : "size-16 shrink-0 rounded-lg object-cover"} /> : <span className={`grid shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground ${fit === "contain" ? "h-16 w-28" : "size-16"}`}><ImagePlus size={20} /></span>}
       <label className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-border bg-background px-3 text-sm font-bold hover:bg-muted">
         {busy ? <Loader2 size={16} className="animate-spin" /> : <ImagePlus size={16} />}{value ? "Trocar" : "Enviar"}
         <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={busy} onChange={(e) => { pick(e.target.files?.[0]); e.target.value = ""; }} />

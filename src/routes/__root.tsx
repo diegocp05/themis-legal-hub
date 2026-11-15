@@ -6,10 +6,12 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { AppShell } from "../components/app-shell";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchPageContent, pageDefaults, type PageContentPayload } from "@/lib/pages";
 
 import appCss from "../styles.css?url";
 
@@ -35,7 +37,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
 
@@ -71,7 +73,16 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
+  loader: async (): Promise<PageContentPayload> => {
+    try {
+      return { content: await fetchPageContent(), fetchedAt: Date.now() };
+    } catch {
+      return { content: pageDefaults, fetchedAt: 0 };
+    }
+  },
+  head: ({ loaderData }) => {
+    const logo = loaderData?.content.site_logo.trim();
+    return {
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -89,9 +100,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" },
-      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      logo ? { rel: "icon", href: logo } : { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
     ],
-  }),
+  };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

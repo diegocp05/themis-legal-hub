@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Scale } from "lucide-react";
 import { useEffect, useState } from "react";
+import { BrandMark } from "@/components/app-shell";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,7 +51,7 @@ function AuthPage() {
 
   return <div className="app-container grid min-h-[70vh] place-items-center py-10">
     <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-sm">
-      <span className="mx-auto grid size-12 place-items-center rounded-lg bg-primary text-gold"><Scale size={22} /></span>
+      <BrandMark className="mx-auto size-12" icon={22} />
       <h1 className="mt-4 text-center text-2xl font-bold">{mode === "in" ? "Acesso da diretoria" : "Recuperar senha"}</h1>
       <p className="mt-2 text-center text-sm text-muted-foreground">Área restrita aos membros da diretoria do DA. As contas são criadas pelo responsável pela plataforma.</p>
       <form onSubmit={submit} className="mt-6">

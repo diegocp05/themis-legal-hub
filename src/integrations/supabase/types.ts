@@ -41,11 +41,51 @@ export type Database = {
         }
         Relationships: []
       }
+      activity_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          area: string
+          created_at: string
+          entity_id: string | null
+          id: string
+          summary: string
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          area: string
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          summary: string
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          area?: string
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          summary?: string
+        }
+        Relationships: []
+      }
+      page_content: {
+        Row: { key: string; updated_at: string; value: string }
+        Insert: { key: string; updated_at?: string; value?: string }
+        Update: { key?: string; updated_at?: string; value?: string }
+        Relationships: []
+      }
       board_members: {
         Row: {
           active: boolean
           created_at: string
           id: string
+          in_chapa: boolean
           instagram: string | null
           name: string
           photo_url: string | null
@@ -53,11 +93,13 @@ export type Database = {
           sector: string
           sort_order: number
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           active?: boolean
           created_at?: string
           id?: string
+          in_chapa?: boolean
           instagram?: string | null
           name: string
           photo_url?: string | null
@@ -65,11 +107,13 @@ export type Database = {
           sector?: string
           sort_order?: number
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           active?: boolean
           created_at?: string
           id?: string
+          in_chapa?: boolean
           instagram?: string | null
           name?: string
           photo_url?: string | null
@@ -77,8 +121,74 @@ export type Database = {
           sector?: string
           sort_order?: number
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
+      }
+      certificate_template: {
+        Row: {
+          athletics_name: string | null
+          athletics_signature: string | null
+          coordinator_name: string | null
+          coordinator_signature: string | null
+          da_name: string | null
+          da_signature: string | null
+          id: string
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          athletics_name?: string | null
+          athletics_signature?: string | null
+          coordinator_name?: string | null
+          coordinator_signature?: string | null
+          da_name?: string | null
+          da_signature?: string | null
+          id?: string
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          athletics_name?: string | null
+          athletics_signature?: string | null
+          coordinator_name?: string | null
+          coordinator_signature?: string | null
+          da_name?: string | null
+          da_signature?: string | null
+          id?: string
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      event_photos: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          image_url: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          image_url: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          image_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_schedule: {
         Row: {
@@ -113,8 +223,16 @@ export type Database = {
         Row: {
           capacity: number | null
           category: Database["public"]["Enums"]["event_category"]
+          certificate_athletics_name: string | null
+          certificate_athletics_signature: string | null
+          certificate_complementary_hours: number | null
+          certificate_coordinator_name: string | null
+          certificate_coordinator_signature: string | null
+          certificate_da_name: string | null
+          certificate_da_signature: string | null
           certificate_enabled: boolean
           certificate_hours: number | null
+          certificate_mandatory_hours: number | null
           created_at: string
           description: string | null
           ends_at: string | null
@@ -134,8 +252,16 @@ export type Database = {
         Insert: {
           capacity?: number | null
           category?: Database["public"]["Enums"]["event_category"]
+          certificate_athletics_name?: string | null
+          certificate_athletics_signature?: string | null
+          certificate_complementary_hours?: number | null
+          certificate_coordinator_name?: string | null
+          certificate_coordinator_signature?: string | null
+          certificate_da_name?: string | null
+          certificate_da_signature?: string | null
           certificate_enabled?: boolean
           certificate_hours?: number | null
+          certificate_mandatory_hours?: number | null
           created_at?: string
           description?: string | null
           ends_at?: string | null
@@ -155,8 +281,16 @@ export type Database = {
         Update: {
           capacity?: number | null
           category?: Database["public"]["Enums"]["event_category"]
+          certificate_athletics_name?: string | null
+          certificate_athletics_signature?: string | null
+          certificate_complementary_hours?: number | null
+          certificate_coordinator_name?: string | null
+          certificate_coordinator_signature?: string | null
+          certificate_da_name?: string | null
+          certificate_da_signature?: string | null
           certificate_enabled?: boolean
           certificate_hours?: number | null
+          certificate_mandatory_hours?: number | null
           created_at?: string
           description?: string | null
           ends_at?: string | null
@@ -398,7 +532,7 @@ export type Database = {
         Returns: boolean
       }
       issue_certificate: {
-        Args: { _email: string; _event_id: string; _ra: string }
+        Args: { _email: string; _event_id: string; _hour_type: string; _ra: string; _year: number }
         Returns: Json
       }
       list_board: {
@@ -410,6 +544,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      save_page_content: { Args: { _entries: Json }; Returns: undefined }
       register_for_event: {
         Args: {
           _email: string
