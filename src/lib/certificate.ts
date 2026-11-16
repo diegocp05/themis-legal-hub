@@ -1,6 +1,5 @@
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { formatEventDays, slugify } from "@/lib/data";
+import { formatDateExtendedBR, parseSafeDate } from "@/utils/dateUtils";
 
 export type CertificateSigner = {
   role: string;
@@ -27,6 +26,7 @@ export type CertificateData = {
   hours: number | null;
   hour_type: "complementar" | "obrigatoria";
   signers: CertificateSigner[];
+  managementName?: string;
 };
 
 const INK: [number, number, number] = [28, 28, 28];
@@ -85,20 +85,24 @@ export function blankCertificate(signers: CertificateSigner[]): CertificateData 
   };
 }
 
-async function loadSignature(url: string) {
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("signature");
-  const bitmap = await createImageBitmap(await response.blob());
-  const canvas = document.createElement("canvas");
-  canvas.width = bitmap.width;
-  canvas.height = bitmap.height;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("signature");
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(bitmap, 0, 0);
-  bitmap.close();
-  return canvas.toDataURL("image/png");
+async function loadSignature(url: string): Promise<string | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const bitmap = await createImageBitmap(await response.blob());
+    const canvas = document.createElement("canvas");
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return null;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close();
+    return canvas.toDataURL("image/png");
+  } catch {
+    return null;
+  }
 }
 
 /** Builds the A4 landscape certificate in the browser and starts the download. */
@@ -108,7 +112,12 @@ export async function downloadCertificate(c: CertificateData) {
   const W = 297;
   const H = 210;
   const cx = W / 2;
-  const images = await Promise.all(c.signers.map((signer) => (signer.signature_url ? loadSignature(signer.signature_url) : Promise.resolve(null))));
+
+  // Carrega assinaturas de forma resiliente (não falha o PDF inteiro se uma imagem falhar)
+  const settledImages = await Promise.allSettled(
+    c.signers.map((signer) => (signer.signature_url ? loadSignature(signer.signature_url) : Promise.resolve(null)))
+  );
+  const images = settledImages.map((res) => (res.status === "fulfilled" ? res.value : null));
 
   doc.setFillColor(...INK);
   doc.rect(0, 0, W, H, "F");
@@ -136,28 +145,40 @@ export async function downloadCertificate(c: CertificateData) {
   doc.setTextColor(...GOLD);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  spaced("DIRETÓRIO ACADÊMICO DE DIREITO", 36, 1.5);
+  spaced("DIRETÓRIO ACADÊMICO DE DIREITO", 34, 1.5);
+
+  if (c.managementName) {
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8.5);
+    doc.setTextColor(...MUTED);
+    doc.text(c.managementName.toUpperCase(), cx, 40, { align: "center" });
+  }
 
   doc.setTextColor(...INK);
   doc.setFont("times", "bold");
   doc.setFontSize(36);
-  spaced("CERTIFICADO", 54, 2);
+  spaced("CERTIFICADO", 55, 2);
   doc.setDrawColor(...GOLD);
   doc.setLineWidth(0.6);
-  doc.line(cx - 28, 59, cx + 28, 59);
+  doc.line(cx - 28, 60, cx + 28, 60);
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
   doc.setTextColor(...MUTED);
   doc.text("Certificamos que", cx, 74, { align: "center" });
 
+  // Nome do participante com quebra automática caso ultrapasse a largura útil
   doc.setFont("times", "bold");
   doc.setTextColor(...INK);
-  fit(c.name, W - 70, 26, 14);
-  doc.text(c.name, cx, 88, { align: "center" });
+  fit(c.name, W - 70, 26, 15);
+  const nameLines = doc.splitTextToSize(c.name.trim(), W - 65);
+  doc.text(nameLines, cx, 87, { align: "center" });
+  const nameOffset = Math.max(0, (nameLines.length - 1) * 7);
 
   const when = formatEventDays(c);
-  const year = format(new Date(c.starts_at), "yyyy");
+  const safeStart = parseSafeDate(c.starts_at) ?? new Date();
+  const year = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", year: "numeric" }).format(safeStart);
+
   const parts = [
     `participou do evento “${c.event_title}”, realizado em ${when} de ${year}`,
     c.location ? `, em ${c.location}` : "",
@@ -166,7 +187,7 @@ export async function downloadCertificate(c: CertificateData) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(12);
   doc.setTextColor(...INK);
-  doc.text(doc.splitTextToSize(parts.join(""), W - 80), cx, 102, { align: "center", lineHeightFactor: 1.35 });
+  doc.text(doc.splitTextToSize(parts.join(""), W - 80), cx, 102 + nameOffset, { align: "center", lineHeightFactor: 1.35 });
 
   const centers = [74, cx, 223];
   c.signers.forEach((signer, index) => {
@@ -200,7 +221,7 @@ export async function downloadCertificate(c: CertificateData) {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8);
   doc.setTextColor(...MUTED);
-  doc.text(`Emitido em ${format(new Date(), "d 'de' MMMM 'de' yyyy", { locale: ptBR })} · RA ${c.ra}`, cx, 186, { align: "center" });
+  doc.text(`Emitido em ${formatDateExtendedBR(new Date())} · RA ${c.ra}`, cx, 186, { align: "center" });
 
   doc.save(`Certificado-${slugify(c.event_title)}-${slugify(c.name)}.pdf`);
 }

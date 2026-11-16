@@ -10,9 +10,8 @@ const accepted = ["image/jpeg", "image/png", "image/webp"];
 
 async function preparePhoto(file: File) {
   if (!accepted.includes(file.type)) throw new Error("type");
-  if (file.size <= 5 * 1024 * 1024) return file;
   const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 2400 / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");
   canvas.width = Math.max(1, Math.round(bitmap.width * scale));
   canvas.height = Math.max(1, Math.round(bitmap.height * scale));
@@ -21,12 +20,12 @@ async function preparePhoto(file: File) {
   ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
   let blob: Blob | null = null;
-  for (let quality = 0.85; quality >= 0.5; quality -= 0.1) {
-    blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
-    if (blob && blob.size <= 5 * 1024 * 1024) break;
+  for (let quality = 0.82; quality >= 0.5; quality -= 0.1) {
+    blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+    if (blob && blob.size <= 1.8 * 1024 * 1024) break;
   }
-  if (!blob || blob.size > 5 * 1024 * 1024) throw new Error("size");
-  return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+  if (!blob || blob.size > 2 * 1024 * 1024) throw new Error("size");
+  return new File([blob], file.name.replace(/\.\w+$/, "") + ".webp", { type: "image/webp" });
 }
 
 export function EventPhotos({ event, onBack }: { event: EventRow; onBack: () => void }) {
@@ -86,7 +85,7 @@ export function EventPhotos({ event, onBack }: { event: EventRow; onBack: () => 
       {!isLoading && photos.length === 0 && <p className="rounded-lg bg-muted p-6 text-center text-sm text-muted-foreground">Nenhuma foto neste evento.</p>}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {photos.map((photo, index) => <div key={photo.id} className="relative overflow-hidden rounded-xl border border-border">
-          <img src={photo.image_url} alt="" className="aspect-square w-full object-cover" />
+          <img src={photo.image_url} alt="" loading="lazy" className="aspect-square w-full object-cover" />
           <button type="button" className="absolute right-2 top-2 grid size-8 place-items-center rounded-lg bg-card text-destructive" onClick={() => remove(photo.id, photo.image_url)} aria-label={`Remover foto ${index + 1}`}><Trash2 size={15} /></button>
         </div>)}
       </div>
