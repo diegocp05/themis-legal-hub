@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { BrandMark } from "@/components/app-shell";
 import { z } from "zod";
@@ -23,10 +24,17 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const input = "h-12 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring";
+const input = "h-12 w-full rounded-lg border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring";
 
 function safeTarget(value: unknown): string {
   return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : "/";
+}
+
+function getSiteOrigin(): string {
+  if (typeof window !== "undefined" && window.location?.origin && window.location.origin !== "null") {
+    return window.location.origin;
+  }
+  return "https://themis-legal-hub.vercel.app";
 }
 
 function AuthPage() {
@@ -37,6 +45,7 @@ function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -54,15 +63,18 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
+    const origin = getSiteOrigin();
+
     try {
       if (mode === "in") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
         if (error) setMsg({ ok: false, text: "E-mail ou senha incorretos." });
       } else if (mode === "up") {
         const { error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
+            emailRedirectTo: `${origin}/auth`,
             data: { full_name: fullName.trim() },
           },
         });
@@ -71,13 +83,14 @@ function AuthPage() {
         } else {
           setMsg({
             ok: true,
-            text: "Conta criada com sucesso! Verifique seu e-mail caso a confirmação esteja ativa ou faça login.",
+            text: "Conta criada com sucesso! Verifique seu e-mail para confirmar o cadastro ou faça login.",
           });
           setMode("in");
+          setShowPassword(false);
         }
       } else {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+        const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+          redirectTo: `${origin}/reset-password`,
         });
         setMsg(
           error
@@ -107,14 +120,14 @@ function AuthPage() {
           <div className="mt-5 grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
             <button
               type="button"
-              onClick={() => { setMode("in"); setMsg(null); }}
+              onClick={() => { setMode("in"); setMsg(null); setShowPassword(false); }}
               className={`h-9 rounded-md text-xs font-bold transition ${mode === "in" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
             >
               Já tenho conta
             </button>
             <button
               type="button"
-              onClick={() => { setMode("up"); setMsg(null); }}
+              onClick={() => { setMode("up"); setMsg(null); setShowPassword(false); }}
               className={`h-9 rounded-md text-xs font-bold transition ${mode === "up" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground"}`}
             >
               Criar conta
@@ -136,15 +149,25 @@ function AuthPage() {
           {mode !== "forgot" && (
             <label className="grid gap-1.5 text-sm font-bold">
               Senha
-              <input
-                required
-                minLength={8}
-                type="password"
-                autoComplete={mode === "in" ? "current-password" : "new-password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={input}
-              />
+              <div className="relative">
+                <input
+                  required
+                  minLength={8}
+                  type={showPassword ? "text" : "password"}
+                  autoComplete={mode === "in" ? "current-password" : "new-password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={`${input} pr-11`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+                  className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-md text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </label>
           )}
           {msg && (
@@ -163,7 +186,7 @@ function AuthPage() {
               Esqueci a senha
             </button>
           ) : (
-            <button type="button" className="font-bold text-primary" onClick={() => { setMode("in"); setMsg(null); }}>
+            <button type="button" className="font-bold text-primary" onClick={() => { setMode("in"); setMsg(null); setShowPassword(false); }}>
               Voltar para o login
             </button>
           )}
