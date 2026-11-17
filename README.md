@@ -1,4 +1,4 @@
-# Sistema Themis
+# Sistema Têmis
 
 Portal oficial do Diretório Acadêmico de Direito: eventos com inscrição e certificado, loja de produtos, avisos e painel administrativo da diretoria.
 

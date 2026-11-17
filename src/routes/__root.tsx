@@ -86,7 +86,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Sistema Themis" },
+      { title: "Sistema Têmis" },
       { name: "description", content: "Portal oficial do Diretório Acadêmico de Direito." },
       { name: "author", content: "Diretório Acadêmico de Direito" },
       { property: "og:type", content: "website" },

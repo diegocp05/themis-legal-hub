@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({ meta: [
-    { title: "Nova senha — Sistema Themis" }, { name: "description", content: "Defina uma nova senha para sua conta." },
-    { property: "og:title", content: "Nova senha — Sistema Themis" }, { property: "og:description", content: "Redefinição de senha do portal." },
+    { title: "Nova senha — Sistema Têmis" }, { name: "description", content: "Defina uma nova senha para sua conta." },
+    { property: "og:title", content: "Nova senha — Sistema Têmis" }, { property: "og:description", content: "Redefinição de senha do portal." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" },
   ] }),
   component: ResetPage,

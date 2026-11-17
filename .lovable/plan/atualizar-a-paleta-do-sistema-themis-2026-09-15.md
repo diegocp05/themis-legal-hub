@@ -1,4 +1,4 @@
-# Atualizar a paleta do Sistema Themis
+# Atualizar a paleta do Sistema Têmis
 
 ## Alterações
 - Substituir os tons azul-marinho por preto e cinzas neutros em todo o sistema visual.

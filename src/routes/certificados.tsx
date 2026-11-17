@@ -16,9 +16,9 @@ export const Route = createFileRoute("/certificados")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
-      { title: "Certificados — Sistema Themis" },
+      { title: "Certificados — Sistema Têmis" },
       { name: "description", content: "Emita o certificado dos eventos do DA de Direito em que você esteve presente." },
-      { property: "og:title", content: "Certificados — Sistema Themis" },
+      { property: "og:title", content: "Certificados — Sistema Têmis" },
       { property: "og:description", content: "Baixe seu certificado de participação." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

@@ -517,7 +517,7 @@ export function EventsAdmin() {
         const count = e.registrations[0]?.count ?? 0;
         const photoCount = photoRows.filter((photo) => photo.event_id === e.id).length;
         return <li key={e.id} className="flex flex-wrap items-center gap-3 p-4 sm:flex-nowrap sm:gap-4 sm:px-5">
-          {e.image_url ? <img src={e.image_url} alt="" className="size-12 shrink-0 rounded-lg object-cover grayscale" /> : <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><CalendarDays size={20} /></span>}
+          {e.image_url ? <img src={e.image_url} alt="" className="size-12 shrink-0 rounded-lg object-cover " /> : <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><CalendarDays size={20} /></span>}
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1.5 truncate font-bold">{e.featured && <Star size={14} className="shrink-0 fill-gold text-gold" />}{e.title}</p>
             <p className="truncate text-xs text-muted-foreground">{formatEventDays(e)} Â· {count}{e.capacity ? `/${e.capacity}` : ""} inscritos</p>
@@ -1191,7 +1191,7 @@ export function ProductsAdmin() {
     <ul className="divide-y divide-border">
       {isLoading && <li className="p-6"><div className="h-12 animate-pulse rounded-lg bg-muted" /></li>}
       {items.map((p) => <li key={p.id} className="flex items-center gap-3 p-4 sm:gap-4 sm:px-5">
-        {p.image_url ? <img src={p.image_url} alt="" width={96} height={96} className={`size-12 shrink-0 rounded-lg object-cover grayscale ${p.active ? "" : "opacity-50"}`} /> : <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><Package size={20} /></span>}
+        {p.image_url ? <img src={p.image_url} alt="" width={96} height={96} className={`size-12 shrink-0 rounded-lg object-cover  ${p.active ? "" : "opacity-50"}`} /> : <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><Package size={20} /></span>}
         <div className="min-w-0 flex-1"><p className="flex items-center gap-1.5 truncate font-bold">{!p.active && <EyeOff size={14} className="shrink-0 text-muted-foreground" />}{p.name}</p><p className="truncate text-xs text-muted-foreground">{money(Number(p.price))}{p.sizes.length ? ` Â· ${p.sizes.join(" Â· ")}` : ""}{p.status !== "disponivel" && ` Â· ${productStatusLabel[p.status]}`}{!p.active && " Â· Oculto"}</p></div>
         <Button variant="outline" size="icon" onClick={() => setForm({ mode: "edit", item: p })} aria-label={`Editar ${p.name}`}><Pencil size={16} /></Button>
         <Button variant="ghost" size="icon" className="text-destructive" onClick={() => remove(p)} aria-label={`Excluir ${p.name}`}><Trash2 size={16} /></Button>
@@ -5970,7 +5970,7 @@ export function ProductCard({ product }: { product: Pick<ProductRow, "id" | "nam
   return <article className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
     <div className="relative">
       {product.image_url
-        ? <img src={product.image_url} alt={product.name} loading="lazy" width={912} height={912} className={`aspect-square w-full object-cover grayscale ${available ? "" : "opacity-60"}`} />
+        ? <img src={product.image_url} alt={product.name} loading="lazy" width={912} height={912} className={`aspect-square w-full object-cover  ${available ? "" : "opacity-60"}`} />
         : <div className="grid aspect-square w-full place-items-center bg-muted text-muted-foreground"><Package size={40} /></div>}
       {!available && <span className={`absolute left-3 top-3 rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase ${product.status === "esgotado" ? "bg-primary text-primary-foreground" : "bg-gold text-gold-foreground"}`}>{productStatusLabel[product.status]}</span>}
     </div>
@@ -7629,7 +7629,7 @@ export type PageKey = (typeof pageFields)[number]["key"];
 
 export const pageDefaults: Record<PageKey, string> = {
   site_logo: "",
-  site_name: "Sistema Themis",
+  site_name: "Sistema Têmis",
   site_tagline: "DiretÃ³rio AcadÃªmico de Direito",
   fallback_image: "",
   home_badge: "DiretÃ³rio AcadÃªmico",
@@ -7723,7 +7723,7 @@ import { formatEventDays } from "@/lib/data";
 import type { OrderStatus } from "@/lib/orders";
 
 export const Route = createFileRoute("/_authenticated/admin")({ head: () => ({ meta: [
-  { title: "Painel da Diretoria â€” Sistema Themis" }, { name: "description", content: "VisÃ£o gerencial do DiretÃ³rio AcadÃªmico." }, { property: "og:title", content: "Painel da Diretoria â€” Sistema Themis" }, { property: "og:description", content: "Eventos, inscriÃ§Ãµes e produtos." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" },
+  { title: "Painel da Diretoria â€” Sistema Têmis" }, { name: "description", content: "VisÃ£o gerencial do DiretÃ³rio AcadÃªmico." }, { property: "og:title", content: "Painel da Diretoria â€” Sistema Têmis" }, { property: "og:description", content: "Eventos, inscriÃ§Ãµes e produtos." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" },
 ] }), component: AdminPage });
 
 function AdminPage() {
@@ -7869,8 +7869,8 @@ import { safeRedirect } from "@/lib/auth";
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
   head: () => ({ meta: [
-    { title: "Entrar â€” Sistema Themis" }, { name: "description", content: "Acesso restrito Ã  diretoria do DA." },
-    { property: "og:title", content: "Entrar â€” Sistema Themis" }, { property: "og:description", content: "Login da diretoria do DA de Direito." },
+    { title: "Entrar â€” Sistema Têmis" }, { name: "description", content: "Acesso restrito Ã  diretoria do DA." },
+    { property: "og:title", content: "Entrar â€” Sistema Têmis" }, { property: "og:description", content: "Login da diretoria do DA de Direito." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" },
   ] }),
   component: AuthPage,
@@ -7946,8 +7946,8 @@ const searchSchema = z.object({ evento: z.string().optional().catch(undefined) }
 export const Route = createFileRoute("/certificados")({
   validateSearch: searchSchema,
   head: () => ({ meta: [
-    { title: "Certificados â€” Sistema Themis" }, { name: "description", content: "Emita o certificado dos eventos do DA de Direito em que vocÃª esteve presente." },
-    { property: "og:title", content: "Certificados â€” Sistema Themis" }, { property: "og:description", content: "Baixe seu certificado de participaÃ§Ã£o." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+    { title: "Certificados â€” Sistema Têmis" }, { name: "description", content: "Emita o certificado dos eventos do DA de Direito em que vocÃª esteve presente." },
+    { property: "og:title", content: "Certificados â€” Sistema Têmis" }, { property: "og:description", content: "Baixe seu certificado de participaÃ§Ã£o." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
   ] }),
   component: CertificatesPage,
 });
@@ -8048,7 +8048,7 @@ import { useActiveProducts } from "@/lib/data";
 
 const searchSchema = z.object({ item: z.string().catch("") });
 export const Route = createFileRoute("/checkout")({ validateSearch: (search) => searchSchema.parse(search), head: () => ({ meta: [
-  { title: "Finalizar pedido â€” Sistema Themis" }, { name: "description", content: "Finalize seu pedido." }, { property: "og:title", content: "Finalizar pedido â€” Sistema Themis" }, { property: "og:description", content: "Pagamento simples e seguro." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  { title: "Finalizar pedido â€” Sistema Têmis" }, { name: "description", content: "Finalize seu pedido." }, { property: "og:title", content: "Finalizar pedido â€” Sistema Têmis" }, { property: "og:description", content: "Pagamento simples e seguro." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: CheckoutPage });
 
 const CARD_FEE = 0.0349;
@@ -8177,7 +8177,7 @@ import hero from "@/assets/semana-juridica.jpg";
 const searchSchema = z.object({ aba: z.enum(["fotos"]).optional().catch(undefined) });
 
 export const Route = createFileRoute("/eventos/$slug")({ validateSearch: searchSchema, head: () => ({ meta: [
-  { title: "Evento â€” Sistema Themis" }, { name: "description", content: "InscriÃ§Ã£o gratuita em evento do DA de Direito." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  { title: "Evento â€” Sistema Têmis" }, { name: "description", content: "InscriÃ§Ã£o gratuita em evento do DA de Direito." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: EventPage });
 
 function EventPage() {
@@ -8196,7 +8196,7 @@ function EventPage() {
   const tab = aba === "fotos" ? "fotos" : "sobre";
   const choose = (next: "sobre" | "fotos") => navigate({ search: next === "fotos" ? { aba: "fotos" } : {}, replace: true });
   return <div className="app-container py-5 sm:py-10">
-    <img src={event.image_url || pageText(pages, "fallback_image") || hero} alt={event.title} width={1600} height={912} className="aspect-[16/9] w-full rounded-xl object-cover grayscale" />
+    <img src={event.image_url || pageText(pages, "fallback_image") || hero} alt={event.title} width={1600} height={912} className="aspect-[16/9] w-full rounded-xl object-cover " />
     <span className="mt-6 block text-sm font-bold uppercase text-gold">{categoryLabel(event.category)} Â· Gratuito</span>
     <h1 className="mt-2 text-3xl font-bold sm:text-4xl">{event.title}</h1>
     <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3"><Info icon={CalendarDays} text={formatEventDays(event)} /><Info icon={Clock3} text={formatEventHours(event)} />{event.location && <Info icon={MapPin} text={event.location} />}</div>
@@ -8302,7 +8302,7 @@ import { pageText, usePageContent } from "@/lib/pages";
 import hero from "@/assets/semana-juridica.jpg";
 
 export const Route = createFileRoute("/eventos/")({ head: () => ({ meta: [
-  { title: "Eventos â€” Sistema Themis" }, { name: "description", content: "Eventos do DiretÃ³rio AcadÃªmico de Direito com inscriÃ§Ã£o gratuita." }, { property: "og:title", content: "Eventos â€” Sistema Themis" }, { property: "og:description", content: "Palestras, debates e encontros do DA de Direito." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  { title: "Eventos â€” Sistema Têmis" }, { name: "description", content: "Eventos do DiretÃ³rio AcadÃªmico de Direito com inscriÃ§Ã£o gratuita." }, { property: "og:title", content: "Eventos â€” Sistema Têmis" }, { property: "og:description", content: "Palestras, debates e encontros do DA de Direito." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: EventsPage });
 
 function EventsPage() {
@@ -8344,7 +8344,7 @@ function EventCard({ event }: { event: EventRow }) {
   const { data: pages } = usePageContent();
   const image = event.image_url || pageText(pages, "fallback_image") || hero;
   return <Link to="/eventos/$slug" params={{ slug: event.slug }} className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:border-primary">
-    <img src={image} alt="" loading="lazy" width={800} height={450} className="aspect-[16/9] w-full object-cover grayscale" />
+    <img src={image} alt="" loading="lazy" width={800} height={450} className="aspect-[16/9] w-full object-cover " />
     <div className="p-4">
       <div className="flex flex-wrap gap-1.5">
         <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase ${open ? "bg-success-soft text-success" : "bg-muted text-muted-foreground"}`}>{open ? "InscriÃ§Ãµes abertas" : "InscriÃ§Ãµes encerradas"}</span>
@@ -8360,7 +8360,7 @@ function EventCard({ event }: { event: EventRow }) {
 function PastEventCard({ event }: { event: EventRow }) {
   const { data: pages } = usePageContent();
   return <article className="flex items-center gap-4 rounded-xl border border-border bg-card p-3">
-    <img src={event.image_url || pageText(pages, "fallback_image") || hero} alt="" loading="lazy" width={160} height={160} className="size-16 shrink-0 rounded-lg object-cover opacity-80 grayscale" />
+    <img src={event.image_url || pageText(pages, "fallback_image") || hero} alt="" loading="lazy" width={160} height={160} className="size-16 shrink-0 rounded-lg object-cover opacity-80 " />
     <div className="min-w-0 flex-1">
       <h3 className="truncate font-bold">{event.title}</h3>
       <p className="text-xs text-muted-foreground">{formatEventDays(event)} Â· {categoryLabel(event.category)}</p>
@@ -8385,9 +8385,9 @@ import hero from "@/assets/semana-juridica.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Sistema Themis â€” Portal do Direito" },
+    { title: "Sistema Têmis â€” Portal do Direito" },
     { name: "description", content: "Eventos, produtos e avisos do DiretÃ³rio AcadÃªmico de Direito." },
-    { property: "og:title", content: "Sistema Themis â€” Portal do Direito" },
+    { property: "og:title", content: "Sistema Têmis â€” Portal do Direito" },
     { property: "og:description", content: "Eventos, produtos e avisos do DiretÃ³rio AcadÃªmico de Direito." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
   ] }),
@@ -8404,7 +8404,7 @@ function Index() {
   const banner = pageText(pages, "fallback_image") || hero;
   return <>
     <section className="relative min-h-[500px] overflow-hidden bg-primary text-primary-foreground md:min-h-[560px]">
-      <img src={highlight?.image_url || banner} alt={highlight?.title ?? pageText(pages, "home_title")} width={1600} height={912} className="absolute inset-0 h-full w-full object-cover object-[62%_center] opacity-70 grayscale" />
+      <img src={highlight?.image_url || banner} alt={highlight?.title ?? pageText(pages, "home_title")} width={1600} height={912} className="absolute inset-0 h-full w-full object-cover object-[62%_center] opacity-70 " />
       <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-primary/10" />
       <div className="app-container relative flex min-h-[500px] items-end pb-10 pt-24 md:min-h-[560px] md:items-center md:py-20">
         {highlight ? <div className="max-w-xl">
@@ -8470,8 +8470,8 @@ import { useActiveProducts } from "@/lib/data";
 import { pageText, usePageContent } from "@/lib/pages";
 
 export const Route = createFileRoute("/produtos")({ head: () => ({ meta: [
-  { title: "Produtos sob encomenda â€” Sistema Themis" }, { name: "description", content: "Produtos oficiais do DiretÃ³rio AcadÃªmico de Direito." },
-  { property: "og:title", content: "Produtos sob encomenda â€” Sistema Themis" }, { property: "og:description", content: "Garanta produtos oficiais no lote atual." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  { title: "Produtos sob encomenda â€” Sistema Têmis" }, { name: "description", content: "Produtos oficiais do DiretÃ³rio AcadÃªmico de Direito." },
+  { property: "og:title", content: "Produtos sob encomenda â€” Sistema Têmis" }, { property: "og:description", content: "Garanta produtos oficiais no lote atual." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: ProductsPage });
 
 function ProductsPage() {
@@ -8498,8 +8498,8 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({ meta: [
-    { title: "Nova senha â€” Sistema Themis" }, { name: "description", content: "Defina uma nova senha para sua conta." },
-    { property: "og:title", content: "Nova senha â€” Sistema Themis" }, { property: "og:description", content: "RedefiniÃ§Ã£o de senha do portal." },
+    { title: "Nova senha â€” Sistema Têmis" }, { name: "description", content: "Defina uma nova senha para sua conta." },
+    { property: "og:title", content: "Nova senha â€” Sistema Têmis" }, { property: "og:description", content: "RedefiniÃ§Ã£o de senha do portal." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" },
   ] }),
   component: ResetPage,
@@ -8613,7 +8613,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Sistema Themis" },
+      { title: "Sistema Têmis" },
       { name: "description", content: "Portal oficial do DiretÃ³rio AcadÃªmico de Direito." },
       { name: "author", content: "DiretÃ³rio AcadÃªmico de Direito" },
       { property: "og:type", content: "website" },
@@ -10086,7 +10086,7 @@ CREATE TABLE public.page_content (
 
 INSERT INTO public.page_content (key, value) VALUES
   ('site_logo', ''),
-  ('site_name', 'Sistema Themis'),
+  ('site_name', 'Sistema Têmis'),
   ('site_tagline', 'DiretÃ³rio AcadÃªmico de Direito'),
   ('home_badge', 'DiretÃ³rio AcadÃªmico'),
   ('home_title', 'Portal do Direito'),

@@ -30,7 +30,7 @@ export function ProductsAdmin() {
     <ul className="divide-y divide-border">
       {isLoading && <li className="p-6"><div className="h-12 animate-pulse rounded-lg bg-muted" /></li>}
       {items.map((p) => <li key={p.id} className="flex items-center gap-3 p-4 sm:gap-4 sm:px-5">
-        {p.image_url ? <img src={p.image_url} alt="" width={96} height={96} className={`size-12 shrink-0 rounded-lg object-cover grayscale ${p.active ? "" : "opacity-50"}`} /> : <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><Package size={20} /></span>}
+        {p.image_url ? <img src={p.image_url} alt="" width={96} height={96} className={`size-12 shrink-0 rounded-lg object-cover  ${p.active ? "" : "opacity-50"}`} /> : <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground"><Package size={20} /></span>}
         <div className="min-w-0 flex-1"><p className="flex items-center gap-1.5 truncate font-bold">{!p.active && <EyeOff size={14} className="shrink-0 text-muted-foreground" />}{p.name}</p><p className="truncate text-xs text-muted-foreground">{money(Number(p.price))}{p.sizes.length ? ` · ${p.sizes.join(" · ")}` : ""}{p.status !== "disponivel" && ` · ${productStatusLabel[p.status]}`}{!p.active && " · Oculto"}</p></div>
         <Button variant="outline" size="icon" onClick={() => setForm({ mode: "edit", item: p })} aria-label={`Editar ${p.name}`}><Pencil size={16} /></Button>
         <Button variant="ghost" size="icon" className="text-destructive" onClick={() => remove(p)} aria-label={`Excluir ${p.name}`}><Trash2 size={16} /></Button>

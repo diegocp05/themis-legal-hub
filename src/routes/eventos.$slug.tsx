@@ -13,7 +13,7 @@ import hero from "@/assets/semana-juridica.jpg";
 const searchSchema = z.object({ aba: z.enum(["fotos"]).optional().catch(undefined) });
 
 export const Route = createFileRoute("/eventos/$slug")({ validateSearch: searchSchema, head: () => ({ meta: [
-  { title: "Evento — Sistema Themis" }, { name: "description", content: "Inscrição gratuita em evento do DA de Direito." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  { title: "Evento — Sistema Têmis" }, { name: "description", content: "Inscrição gratuita em evento do DA de Direito." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: EventPage });
 
 function EventPage() {
@@ -32,7 +32,7 @@ function EventPage() {
   const tab = aba === "fotos" ? "fotos" : "sobre";
   const choose = (next: "sobre" | "fotos") => navigate({ search: next === "fotos" ? { aba: "fotos" } : {}, replace: true });
   return <div className="app-container py-5 sm:py-10">
-    <img src={event.image_url || pageText(pages, "fallback_image") || hero} alt={event.title} width={1600} height={912} className="aspect-[16/9] w-full rounded-xl object-cover grayscale" />
+    <img src={event.image_url || pageText(pages, "fallback_image") || hero} alt={event.title} width={1600} height={912} className="aspect-[16/9] w-full rounded-xl object-cover " />
     <span className="mt-6 block text-sm font-bold uppercase text-gold">{categoryLabel(event.category)} · Gratuito</span>
     <h1 className="mt-2 text-3xl font-bold sm:text-4xl">{event.title}</h1>
     <div className="mt-5 grid gap-3 text-sm sm:grid-cols-3"><Info icon={CalendarDays} text={formatEventDays(event)} /><Info icon={Clock3} text={formatEventHours(event)} />{event.location && <Info icon={MapPin} text={event.location} />}</div>

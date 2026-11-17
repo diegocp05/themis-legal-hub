@@ -7,7 +7,7 @@ import { pageText, usePageContent } from "@/lib/pages";
 import hero from "@/assets/semana-juridica.jpg";
 
 export const Route = createFileRoute("/eventos/")({ head: () => ({ meta: [
-  { title: "Eventos — Sistema Themis" }, { name: "description", content: "Eventos do Diretório Acadêmico de Direito com inscrição gratuita." }, { property: "og:title", content: "Eventos — Sistema Themis" }, { property: "og:description", content: "Palestras, debates e encontros do DA de Direito." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  { title: "Eventos — Sistema Têmis" }, { name: "description", content: "Eventos do Diretório Acadêmico de Direito com inscrição gratuita." }, { property: "og:title", content: "Eventos — Sistema Têmis" }, { property: "og:description", content: "Palestras, debates e encontros do DA de Direito." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: EventsPage });
 
 function EventsPage() {
@@ -49,7 +49,7 @@ function EventCard({ event }: { event: EventRow }) {
   const { data: pages } = usePageContent();
   const image = event.image_url || pageText(pages, "fallback_image") || hero;
   return <Link to="/eventos/$slug" params={{ slug: event.slug }} className="group overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:border-primary">
-    <img src={image} alt="" loading="lazy" width={800} height={450} className="aspect-[16/9] w-full object-cover grayscale" />
+    <img src={image} alt="" loading="lazy" width={800} height={450} className="aspect-[16/9] w-full object-cover " />
     <div className="p-4">
       <div className="flex flex-wrap gap-1.5">
         <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-bold uppercase ${open ? "bg-success-soft text-success" : "bg-muted text-muted-foreground"}`}>{open ? "Inscrições abertas" : "Inscrições encerradas"}</span>
@@ -65,7 +65,7 @@ function EventCard({ event }: { event: EventRow }) {
 function PastEventCard({ event }: { event: EventRow }) {
   const { data: pages } = usePageContent();
   return <article className="flex items-center gap-4 rounded-xl border border-border bg-card p-3">
-    <img src={event.image_url || pageText(pages, "fallback_image") || hero} alt="" loading="lazy" width={160} height={160} className="size-16 shrink-0 rounded-lg object-cover opacity-80 grayscale" />
+    <img src={event.image_url || pageText(pages, "fallback_image") || hero} alt="" loading="lazy" width={160} height={160} className="size-16 shrink-0 rounded-lg object-cover opacity-80 " />
     <div className="min-w-0 flex-1">
       <h3 className="truncate font-bold">{event.title}</h3>
       <p className="text-xs text-muted-foreground">{formatEventDays(event)} · {categoryLabel(event.category)}</p>

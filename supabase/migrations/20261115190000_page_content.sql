@@ -7,7 +7,7 @@ CREATE TABLE public.page_content (
 
 INSERT INTO public.page_content (key, value) VALUES
   ('site_logo', ''),
-  ('site_name', 'Sistema Themis'),
+  ('site_name', 'Sistema Têmis'),
   ('site_tagline', 'Diretório Acadêmico de Direito'),
   ('home_badge', 'Diretório Acadêmico'),
   ('home_title', 'Portal do Direito'),

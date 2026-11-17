@@ -9,9 +9,9 @@ import hero from "@/assets/semana-juridica.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Sistema Themis — Portal do Direito" },
+    { title: "Sistema Têmis — Portal do Direito" },
     { name: "description", content: "Eventos, produtos e avisos do Diretório Acadêmico de Direito." },
-    { property: "og:title", content: "Sistema Themis — Portal do Direito" },
+    { property: "og:title", content: "Sistema Têmis — Portal do Direito" },
     { property: "og:description", content: "Eventos, produtos e avisos do Diretório Acadêmico de Direito." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
   ] }),
@@ -28,7 +28,7 @@ function Index() {
   const banner = pageText(pages, "fallback_image") || hero;
   return <>
     <section className="relative min-h-[500px] overflow-hidden bg-primary text-primary-foreground md:min-h-[560px]">
-      <img src={highlight?.image_url || banner} alt={highlight?.title ?? pageText(pages, "home_title")} width={1600} height={912} className="absolute inset-0 h-full w-full object-cover object-[62%_center] opacity-70 grayscale" />
+      <img src={highlight?.image_url || banner} alt={highlight?.title ?? pageText(pages, "home_title")} width={1600} height={912} className="absolute inset-0 h-full w-full object-cover object-[62%_center] opacity-70 " />
       <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/90 to-primary/10" />
       <div className="app-container relative flex min-h-[500px] items-end pb-10 pt-24 md:min-h-[560px] md:items-center md:py-20">
         {highlight ? <div className="max-w-xl">

@@ -4,8 +4,8 @@ import { useActiveProducts } from "@/lib/data";
 import { pageText, usePageContent } from "@/lib/pages";
 
 export const Route = createFileRoute("/produtos")({ head: () => ({ meta: [
-  { title: "Produtos sob encomenda — Sistema Themis" }, { name: "description", content: "Produtos oficiais do Diretório Acadêmico de Direito." },
-  { property: "og:title", content: "Produtos sob encomenda — Sistema Themis" }, { property: "og:description", content: "Garanta produtos oficiais no lote atual." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
+  { title: "Produtos sob encomenda — Sistema Têmis" }, { name: "description", content: "Produtos oficiais do Diretório Acadêmico de Direito." },
+  { property: "og:title", content: "Produtos sob encomenda — Sistema Têmis" }, { property: "og:description", content: "Garanta produtos oficiais no lote atual." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" },
 ] }), component: ProductsPage });
 
 function ProductsPage() {

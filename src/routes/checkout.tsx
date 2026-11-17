@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, Copy, CreditCard, MapPin, QrCode, RefreshCcw, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
-import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { money } from "@/lib/catalog";
@@ -14,9 +13,9 @@ export const Route = createFileRoute("/checkout")({
   validateSearch: (search) => searchSchema.parse(search),
   head: () => ({
     meta: [
-      { title: "Finalizar pedido — Sistema Themis" },
+      { title: "Finalizar pedido — Sistema Têmis" },
       { name: "description", content: "Finalize seu pedido." },
-      { property: "og:title", content: "Finalizar pedido — Sistema Themis" },
+      { property: "og:title", content: "Finalizar pedido — Sistema Têmis" },
       { property: "og:description", content: "Pagamento simples e seguro." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -157,7 +156,13 @@ function CheckoutPage() {
             {method === "pix" ? (
               <div className="mt-5 flex flex-col items-center rounded-lg bg-muted p-5 text-center">
                 <div className="rounded-xl bg-white p-3 shadow-sm">
-                  <QRCodeSVG value={pixPayload} size={176} bgColor="#ffffff" fgColor="#0f172a" level="M" />
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=4&data=${encodeURIComponent(pixPayload)}`}
+                    alt="QR Code PIX da Tesouraria"
+                    width={176}
+                    height={176}
+                    className="size-44 rounded-md"
+                  />
                 </div>
                 <p className="mt-3 text-sm font-bold">Escaneie o QR Code no app do seu banco</p>
                 <p className="mt-1 text-xs text-muted-foreground">

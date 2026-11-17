@@ -9,8 +9,8 @@ import { safeRedirect } from "@/lib/auth";
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ redirect: z.string().optional() }),
   head: () => ({ meta: [
-    { title: "Entrar — Sistema Themis" }, { name: "description", content: "Acesso restrito à diretoria do DA." },
-    { property: "og:title", content: "Entrar — Sistema Themis" }, { property: "og:description", content: "Login da diretoria do DA de Direito." },
+    { title: "Entrar — Sistema Têmis" }, { name: "description", content: "Acesso restrito à diretoria do DA." },
+    { property: "og:title", content: "Entrar — Sistema Têmis" }, { property: "og:description", content: "Login da diretoria do DA de Direito." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary_large_image" }, { name: "robots", content: "noindex" },
   ] }),
   component: AuthPage,

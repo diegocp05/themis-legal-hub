@@ -36,7 +36,7 @@ export type PageKey = (typeof pageFields)[number]["key"];
 
 export const pageDefaults: Record<PageKey, string> = {
   site_logo: "",
-  site_name: "Sistema Themis",
+  site_name: "Sistema Têmis",
   site_tagline: "Diretório Acadêmico de Direito",
   fallback_image: "",
   home_badge: "Diretório Acadêmico",

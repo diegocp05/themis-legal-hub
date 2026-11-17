@@ -21,9 +21,9 @@ import type { OrderStatus } from "@/lib/orders";
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
-      { title: "Painel da Diretoria — Sistema Themis" },
+      { title: "Painel da Diretoria — Sistema Têmis" },
       { name: "description", content: "Visão gerencial do Diretório Acadêmico." },
-      { property: "og:title", content: "Painel da Diretoria — Sistema Themis" },
+      { property: "og:title", content: "Painel da Diretoria — Sistema Têmis" },
       { property: "og:description", content: "Eventos, inscrições e produtos." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
