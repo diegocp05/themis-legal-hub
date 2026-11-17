@@ -37,6 +37,29 @@ function getSiteOrigin(): string {
   return "https://themis-legal-hub.vercel.app";
 }
 
+function translateAuthError(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("rate limit")) {
+    return "Muitas tentativas de envio de e-mail em pouco tempo. Aguarde alguns minutos e tente novamente.";
+  }
+  if (m.includes("already registered") || m.includes("already exists")) {
+    return "Este e-mail já está cadastrado. Tente entrar na aba 'Já tenho conta'.";
+  }
+  if (m.includes("invalid login") || m.includes("invalid credentials")) {
+    return "E-mail ou senha incorretos.";
+  }
+  if (m.includes("email not confirmed")) {
+    return "Seu e-mail ainda não foi confirmado. Verifique sua caixa de entrada.";
+  }
+  if (m.includes("password") && m.includes("least")) {
+    return "A senha precisa ter pelo menos 8 caracteres.";
+  }
+  if (m.includes("invalid email") || m.includes("unable to validate email")) {
+    return "Digite um endereço de e-mail válido.";
+  }
+  return "Não foi possível concluir a solicitação agora. Tente novamente em instantes.";
+}
+
 function AuthPage() {
   const { redirect } = Route.useSearch();
   const target = safeTarget(redirect);
@@ -68,9 +91,9 @@ function AuthPage() {
     try {
       if (mode === "in") {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-        if (error) setMsg({ ok: false, text: "E-mail ou senha incorretos." });
+        if (error) setMsg({ ok: false, text: translateAuthError(error.message) });
       } else if (mode === "up") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password,
           options: {
@@ -79,11 +102,11 @@ function AuthPage() {
           },
         });
         if (error) {
-          setMsg({ ok: false, text: error.message || "Não foi possível criar sua conta agora." });
-        } else {
+          setMsg({ ok: false, text: translateAuthError(error.message) });
+        } else if (!data.session) {
           setMsg({
             ok: true,
-            text: "Conta criada com sucesso! Verifique seu e-mail para confirmar o cadastro ou faça login.",
+            text: "Conta criada com sucesso! Verifique seu e-mail para confirmar o cadastro e fazer login.",
           });
           setMode("in");
           setShowPassword(false);
@@ -94,7 +117,7 @@ function AuthPage() {
         });
         setMsg(
           error
-            ? { ok: false, text: "Não foi possível enviar o link agora. Tente novamente em alguns minutos." }
+            ? { ok: false, text: translateAuthError(error.message) }
             : { ok: true, text: "Se o e-mail estiver cadastrado, você vai receber um link para redefinir a senha." }
         );
       }
