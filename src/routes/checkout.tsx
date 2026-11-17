@@ -2,11 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, Copy, CreditCard, MapPin, QrCode, RefreshCcw, ShieldCheck, TriangleAlert } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
+import { QRCodeSVG } from "qrcode.react";
 import { Button } from "@/components/ui/button";
-import { FakeQrCode } from "@/components/qr-code";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 import { money } from "@/lib/catalog";
 import { useActiveProducts } from "@/lib/data";
+import { generatePixPayload } from "@/utils/pixGenerator";
 
 const searchSchema = z.object({ item: z.string().catch("") });
 export const Route = createFileRoute("/checkout")({
@@ -57,6 +58,11 @@ function CheckoutPage() {
   const chosenSize = size || (product.sizes.length === 1 ? product.sizes[0] : "");
   const pixKey = settings.pix_key || "00.000.000/0001-00";
   const pixBeneficiary = settings.pix_beneficiary || "Diretório Acadêmico de Direito";
+  const pixPayload = generatePixPayload({
+    pixKey,
+    beneficiary: pixBeneficiary,
+    amount: total,
+  });
 
   if (stage === "paid") {
     return (
@@ -107,8 +113,6 @@ function CheckoutPage() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          // Quando o checkout real for ativado, chamar:
-          // await (supabase as any).rpc("decrement_product_stock", { p_product_id: product.id, p_quantity: 1 });
           setStage("paid");
         }}
         className="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1fr)_380px]"
@@ -152,14 +156,18 @@ function CheckoutPage() {
             </div>
             {method === "pix" ? (
               <div className="mt-5 flex flex-col items-center rounded-lg bg-muted p-5 text-center">
-                <FakeQrCode />
-                <p className="mt-3 text-sm font-bold">Chave PIX oficial da Tesouraria</p>
-                <p className="mt-1 text-xs text-muted-foreground">Beneficiário: <strong className="text-foreground">{pixBeneficiary}</strong></p>
+                <div className="rounded-xl bg-white p-3 shadow-sm">
+                  <QRCodeSVG value={pixPayload} size={176} bgColor="#ffffff" fgColor="#0f172a" level="M" />
+                </div>
+                <p className="mt-3 text-sm font-bold">Escaneie o QR Code no app do seu banco</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Favorecido: <strong className="text-foreground">{pixBeneficiary}</strong> · Chave: <span className="font-mono">{pixKey}</span>
+                </p>
                 <div className="mt-4 flex w-full max-w-sm items-center gap-2">
                   <input
                     readOnly
-                    value={pixKey}
-                    aria-label="Chave Pix da Tesouraria"
+                    value={pixPayload}
+                    aria-label="Código Pix Copia e Cola"
                     className="h-11 min-w-0 flex-1 truncate rounded-lg border border-input bg-background px-3 font-mono text-xs"
                   />
                   <Button
@@ -167,9 +175,9 @@ function CheckoutPage() {
                     variant="outline"
                     size="icon"
                     className="size-11 shrink-0"
-                    aria-label="Copiar chave Pix"
+                    aria-label="Copiar código Pix"
                     onClick={() => {
-                      navigator.clipboard?.writeText(pixKey).catch(() => undefined);
+                      navigator.clipboard?.writeText(pixPayload).catch(() => undefined);
                       setCopied(true);
                       window.setTimeout(() => setCopied(false), 2000);
                     }}

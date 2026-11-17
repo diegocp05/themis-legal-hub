@@ -128,7 +128,7 @@ function EventForm({ initial, onDone }: { initial: EventRow | null; onDone: () =
     const complementary = parseHours(v.certificate_complementary_hours);
     const mandatory = parseHours(v.certificate_mandatory_hours);
     if ((complementary != null && (!Number.isFinite(complementary) || complementary <= 0)) || (mandatory != null && (!Number.isFinite(mandatory) || mandatory <= 0))) return setError("Informe as horas com um número maior que zero, ex.: 3 ou 1,5.");
-    if (v.certificate_enabled && (complementary == null || mandatory == null)) return setError("Informe as horas complementares e as obrigatórias. Os dois valores podem ser diferentes.");
+    if (v.certificate_enabled && complementary == null) return setError("Informe pelo menos as horas complementares antes de liberar o certificado.");
     if (v.certificate_enabled && !initial?.certificate_enabled) {
       if (templateQuery.isLoading) return setError("Aguarde o modelo do certificado carregar.");
       if (!templateReady(templateQuery.data)) return setError("Salve o modelo do certificado com o nome e a assinatura do presidente do DA, do coordenador e do presidente da Atlética.");
