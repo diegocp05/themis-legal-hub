@@ -4,10 +4,11 @@ import { BrandMark } from "@/components/app-shell";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { safeRedirect } from "@/lib/auth";
+
+const searchSchema = z.object({ redirect: z.string().optional() });
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: z.object({ redirect: z.string().optional() }),
+  validateSearch: (search) => searchSchema.parse(search),
   head: () => ({
     meta: [
       { title: "Entrar — Sistema Têmis" },
@@ -24,9 +25,13 @@ export const Route = createFileRoute("/auth")({
 
 const input = "h-12 rounded-lg border border-input bg-background px-3 font-normal outline-none focus:ring-2 focus:ring-ring";
 
+function safeTarget(value: unknown): string {
+  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//") ? value : "/";
+}
+
 function AuthPage() {
   const { redirect } = Route.useSearch();
-  const target = safeRedirect(redirect);
+  const target = safeTarget(redirect);
   const navigate = useNavigate();
   const [mode, setMode] = useState<"in" | "up" | "forgot">("in");
   const [fullName, setFullName] = useState("");
@@ -66,7 +71,7 @@ function AuthPage() {
         } else {
           setMsg({
             ok: true,
-            text: "Conta criada com sucesso! Se a confirmação por e-mail estiver ativa, verifique sua caixa de entrada.",
+            text: "Conta criada com sucesso! Verifique seu e-mail caso a confirmação esteja ativa ou faça login.",
           });
           setMode("in");
         }
@@ -86,7 +91,7 @@ function AuthPage() {
   };
 
   return (
-    <div className="app-container grid min-h-[70vh] place-items-center py-10">
+    <div className="app-container grid min-h-[85vh] place-items-center py-10">
       <div className="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-sm">
         <BrandMark className="mx-auto size-12" icon={22} />
         <h1 className="mt-4 text-center text-2xl font-bold">
@@ -94,8 +99,8 @@ function AuthPage() {
         </h1>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           {mode === "up"
-            ? "Cadastre-se como aluno. Novos cadastros entram como usuário comum e podem ser promovidos pela diretoria."
-            : "Acesse sua conta ou continue navegando livremente pelo site sem cadastro."}
+            ? "Preencha seus dados abaixo para criar seu acesso."
+            : "Entre na sua conta ou explore o portal livremente sem cadastro."}
         </p>
 
         {mode !== "forgot" && (
@@ -148,7 +153,7 @@ function AuthPage() {
             </p>
           )}
           <Button size="lg" className="w-full" type="submit" disabled={busy}>
-            {mode === "in" ? "Entrar" : mode === "up" ? "Cadastrar como usuário comum" : "Enviar link"}
+            {mode === "in" ? "Entrar" : mode === "up" ? "Criar minha conta" : "Enviar link"}
           </Button>
         </form>
 
